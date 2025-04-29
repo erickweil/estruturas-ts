@@ -25,7 +25,7 @@ export class Fila<T> {
         
         delete this.arr[this.inicio];
         this.inicio = this.incrementar(this.inicio);
-        
+
         return temp;
     }
 }
