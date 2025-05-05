@@ -35,7 +35,7 @@ describe("ConsumerArrayQueue", () => {
         consumerArrayQueue.close();
         expect(consumerArrayQueue.isClosed).toBe(true);
         const resultadoPromessa2 = await promessa2;
-        expect(resultadoPromessa2).toBe(undefined);
+        expect(resultadoPromessa2).toBe(null);
         expect(promessaTerminou).toBe(true);
 
         // Deve dar erro ao tentar adicionar depois de fechar
@@ -49,7 +49,7 @@ describe("ConsumerArrayQueue", () => {
         let ultimoValor = -1;
         const promessaForEach = consumerArrayQueue.foreach(async (valor) => {
             // Deve ser chamado em ordem
-            expect(valor !== null && Number.isInteger(valor)).toBeTruthy();
+            expect(valor !== null && valor !== undefined && Number.isInteger(valor)).toBeTruthy();
             expect(valor).toBe(ultimoValor + 1);
 
             // Espera um tempo aleatório para simular processamento

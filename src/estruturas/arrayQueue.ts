@@ -3,23 +3,23 @@ import { Queue } from "../interfaces/queue.js";
 export class ArrayQueue<T> implements Queue<T> {
     private inicio: number;
     private fim: number;
-    private arr: (T | null)[];
+    private arr: (T | undefined)[];
 
     constructor(capacidade: number = 15) {
         this.inicio = 0;
         this.fim = 0;
-        // Inicializa com null para evitar array com buracos
-        this.arr = new Array(capacidade+1).fill(null);
+        // Inicializa com undefined para evitar array com buracos
+        this.arr = new Array(capacidade+1).fill(undefined);
     }
 
     private resize() {
         // Redimensiona o array para o dobro do tamanho
-        // Adiciona null até o novo tamanho (Aproveitando o array que já existe)
+        // Adiciona undefined até o novo tamanho (Aproveitando o array que já existe)
 
         let oldlength = this.arr.length;
         let newLength = this.arr.length * 2;
         for(let i = oldlength; i < newLength; i++) {
-            this.arr.push(null);
+            this.arr.push(undefined);
         }
 
         if(this.fim < this.inicio) {
@@ -27,7 +27,7 @@ export class ArrayQueue<T> implements Queue<T> {
             // Tem que juntar denovo [2345...1] -> [.......12345...]
             for(let i = 0; i < this.fim; i++) {
                 this.arr[oldlength + i] = this.arr[i];
-                this.arr[i] = null;
+                this.arr[i] = undefined;
             }
             this.fim = oldlength + this.fim;
         }
@@ -47,21 +47,21 @@ export class ArrayQueue<T> implements Queue<T> {
         this.fim = this.incrementar(this.fim);
     }
 
-    removeFirst(): T | null {
+    removeFirst(): T | undefined {
         if (this.isEmpty()) {
-            return null;
+            return undefined;
         }
 
         const temp = this.arr[this.inicio];
-        this.arr[this.inicio] = null;
+        this.arr[this.inicio] = undefined;
         this.inicio = this.incrementar(this.inicio);
 
         return temp;
     }
 
-    peekFirst(): T | null {
+    peekFirst(): T | undefined {
         if (this.isEmpty()) {
-            return null;
+            return undefined;
         } else {
             return this.arr[this.inicio];
         }
@@ -69,7 +69,7 @@ export class ArrayQueue<T> implements Queue<T> {
 
     clear() {
         while(this.inicio !== this.fim) {
-            this.arr[this.inicio] = null;
+            this.arr[this.inicio] = undefined;
             this.inicio = this.incrementar(this.inicio);
         }
         this.inicio = 0;

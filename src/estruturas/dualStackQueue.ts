@@ -45,11 +45,11 @@ export class DualStackQueue<T> implements Queue<T> {
      * shift/dequeue - Remove e retorna o primeiro valor da fila
      * @returns {any} Retorna o primeiro valor da fila
      */
-    removeFirst(): T | null {
+    removeFirst(): T | undefined {
         if(this.saida.length === 0) {
             if(this.entrada.length === 0) {
-                // Se não tiver nada na fila, retorna null
-                return null;
+                // Se não tiver nada na fila, retorna undefined
+                return undefined;
             }
             // Inverte a ordem dos elementos
             while(this.entrada.length > 0) {
@@ -57,15 +57,14 @@ export class DualStackQueue<T> implements Queue<T> {
             }
         }
 
-        let ret = this.saida.pop();
-        return ret === undefined ? null : ret;
+        return this.saida.pop();
     }
 
-    peekFirst(): T | null {
+    peekFirst(): T | undefined {
         if(this.saida.length === 0) {
             if(this.entrada.length === 0) {
                 // Se não tiver nada na fila, retorna null
-                return null;
+                return undefined;
             }
             
             // Já que inverte a ordem dos elementos, pega o primeiro da entrada

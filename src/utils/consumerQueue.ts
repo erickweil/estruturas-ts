@@ -1,14 +1,15 @@
 import { ArrayQueue } from "../estruturas/arrayQueue.js";
+import { DualStackQueue } from "../estruturas/dualStackQueue.js";
 import { Queue } from "../interfaces/queue.js";
 
 export class ConsumerQueue<T> {
-    private resolveNext: (() => void) | null;
-    private queue: Queue<T | undefined>;
+    private resolveNext: (() => void) | undefined;
+    private queue: Queue<T | null>;
     public isClosed: boolean;
 
     constructor() {
-        this.resolveNext = null;
-        this.queue = new ArrayQueue<T | undefined>();
+        this.resolveNext = undefined;
+        this.queue = new DualStackQueue<T | null>();
         this.isClosed = false;
     }
 
@@ -18,16 +19,16 @@ export class ConsumerQueue<T> {
      * - Se tiver linha na fila, retorna ela um Promise já resolvida com a linha imediatamente
      * - Se não tiver linha na fila, vai ficar 'esperando' o evento de uma nova linha, e então resolve a Promise quando tiver linha pronta
      */
-    next(): Promise<T | null | undefined> {
+    next(): Promise<T | null> {
         if(!this.queue.isEmpty()) {
             // Se tiver linha na fila, retorna ela imediatamente
-            return Promise.resolve(this.queue.removeFirst());
+            return Promise.resolve(this.queue.removeFirst()!);
         } else {
             // Se não tiver linha na fila, retorna uma Promise que só vai resolver quando tiver linha pronta para ser lida
             return new Promise((resolve) => {
                 this.resolveNext = () => {
-                    this.resolveNext = null;
-                    resolve(this.queue.removeFirst());
+                    this.resolveNext = undefined;
+                    resolve(this.queue.removeFirst()!);
                 };
             });
         }
@@ -48,7 +49,8 @@ export class ConsumerQueue<T> {
     }
 
     close() {
-        this.queue.addLast(undefined);
+        // Para indicar o fim da fila, adiciona um elemento nulo
+        this.queue.addLast(null);
 
         if(this.resolveNext) {
             this.resolveNext();
@@ -58,12 +60,12 @@ export class ConsumerQueue<T> {
     }
 
     // Mudar para async iterator?
-    async foreach(callback: (elem: T | null) => any) {
+    async foreach(callback: (elem: T) => any) {
         while(true) {
             let element = await this.next();
 
             // Se acabou a fila e estiver fechado, para o loop
-            if(element === undefined) {
+            if(element === null) {
                 break;
             }
 

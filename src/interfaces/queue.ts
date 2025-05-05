@@ -1,7 +1,7 @@
 export interface Queue<T> {
     addLast(valor: T): void;
-    removeFirst(): T | null;
-    peekFirst(): T | null;
+    removeFirst(): T | undefined;
+    peekFirst(): T | undefined;
     isEmpty(): boolean;
     clear(): void;
     size(): number;
