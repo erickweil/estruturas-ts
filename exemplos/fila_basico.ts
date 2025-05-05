@@ -1,6 +1,6 @@
-import { Queue } from "../src/estruturas/queue.js";
+import { ArrayQueue } from "../src/estruturas/arrayQueue.js";
 
-let fila = new Queue<string>(5);
+let fila = new ArrayQueue<string>();
 
 for(let i = 5; i >= 0; i--) {
     console.log("Inserido A");
