@@ -1,17 +1,17 @@
-import { Fila } from "../src/estruturas/fila.js";
+import { Queue } from "../src/estruturas/queue.js";
 
-let fila = new Fila<string>(5);
+let fila = new Queue<string>(5);
 
 for(let i = 5; i >= 0; i--) {
     console.log("Inserido A");
-    fila.inserir("A");
+    fila.addLast("A");
     console.log("Inserido B");
-    fila.inserir("B");
+    fila.addLast("B");
     console.log("Inserido C");
-    fila.inserir("C");
+    fila.addLast("C");
 
 
-    console.log("Removido:", fila.remover());
-    console.log("Removido:", fila.remover());
-    console.log("Removido:", fila.remover());
+    console.log("Removido:", fila.removeFirst());
+    console.log("Removido:", fila.removeFirst());
+    console.log("Removido:", fila.removeFirst());
 }
