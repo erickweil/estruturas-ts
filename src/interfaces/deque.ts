@@ -1,4 +1,5 @@
 import { Queue } from "./queue.js";
+import { Stack } from "./stack.js";
 
 export interface Deque<T> {
     addFirst(value: T): void;
@@ -14,7 +15,7 @@ export interface Deque<T> {
 }
 
 // APENAS PARA TESTES - Depois será feita a implementação real com performance O(1)
-export class DequeTest<T> implements Deque<T>, Queue<T> {
+export class DequeTest<T> implements Deque<T>, Queue<T>, Stack<T> {
     private arr: T[] = [];
     constructor() {
         this.arr = [];
@@ -26,12 +27,18 @@ export class DequeTest<T> implements Deque<T>, Queue<T> {
     addLast(value: T): void {
         this.arr.push(value);
     }
+    push(value: T) {
+        this.addLast(value);
+    }
 
     removeFirst(): T | undefined {
         return this.arr.shift();
     }
     removeLast(): T | undefined {
         return this.arr.pop();
+    }
+    pop(): T | undefined {
+        return this.removeLast();
     }
 
     peekFirst(): T | undefined {

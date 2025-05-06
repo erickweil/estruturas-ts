@@ -25,6 +25,7 @@ describe("Testes em Pilha", () => {
         expect(pilha.pop()).toBe("C");
         expect(pilha.pop()).toBe("B");
         expect(pilha.pop()).toBe("A");
+        expect(pilha.pop()).toBe(undefined);
 
         expect(pilha.size()).toBe(0);
         expect(pilha.isEmpty()).toBe(true);

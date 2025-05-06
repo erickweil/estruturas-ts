@@ -69,7 +69,7 @@ describe("Testes em Fila", () => {
         fila.addLast("F");
 
         expect(fila.size()).toBe(6);
-        expect(fila.capacity()).toBeGreaterThan(5);
+        expect(fila.capacity()).toBeGreaterThan(6);
         expect(fila.removeFirst()).toBe("A");
 
         fila.clear();
