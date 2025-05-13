@@ -20,15 +20,18 @@ export class DualStackQueue<T> implements Queue<T> {
         this.saida = [];
     }
 
+    // O(1)
     isEmpty(): boolean {
         return this.entrada.length === 0 && this.saida.length === 0;
     }
 
+    // O(1)
     clear(): void {
         this.entrada = [];
         this.saida = [];
     }
 
+    // O(1)
     capacity(): number {
         // Não tem como saber a capacidade, pois é uma fila dinâmica
         return Infinity;
@@ -36,6 +39,7 @@ export class DualStackQueue<T> implements Queue<T> {
 
     /**
      * push/enqueue - Adiciona valores na fila
+     * O(1)
      */
     addLast(value: T) {
         this.entrada.push(value);
@@ -44,6 +48,7 @@ export class DualStackQueue<T> implements Queue<T> {
     /**
      * shift/dequeue - Remove e retorna o primeiro valor da fila
      * @returns {any} Retorna o primeiro valor da fila
+     * O(N)
      */
     removeFirst(): T | undefined {
         if(this.saida.length === 0) {
@@ -60,6 +65,7 @@ export class DualStackQueue<T> implements Queue<T> {
         return this.saida.pop();
     }
 
+    // O(1)
     peekFirst(): T | undefined {
         if(this.saida.length === 0) {
             if(this.entrada.length === 0) {
@@ -75,6 +81,7 @@ export class DualStackQueue<T> implements Queue<T> {
         return this.saida[this.saida.length - 1];
     }
 
+    // O(1)
     size() {
         return this.entrada.length + this.saida.length;
     }
