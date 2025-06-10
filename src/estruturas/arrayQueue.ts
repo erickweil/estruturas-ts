@@ -12,7 +12,7 @@ export class ArrayQueue<T> implements Queue<T> {
         this.arr = new Array(capacidade+1).fill(undefined);
     }
 
-    private resize() {
+    resize() {
         // Redimensiona o array para o dobro do tamanho
         // Adiciona undefined até o novo tamanho (Aproveitando o array que já existe)
 
