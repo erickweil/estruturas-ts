@@ -1,19 +1,16 @@
 import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
 import { ArrayStack } from "../../src/estruturas/arrayStack.js";
+import { Stack } from "../../src/interfaces/stack.js";
+import { LinkedStack } from "../../src/estruturas/linkedStack.js";
+import { DequeTest } from "../../src/interfaces/deque.js";
 
 describe("Testes em Pilha", () => {
 
-    test("Nova instância da classe", () => {
-        let pilha = new ArrayStack<string>();
-
+    function testStack(pilha: Stack<string>) {
         expect(pilha.isEmpty()).toBe(true);
         expect(pilha.size()).toBe(0);
         expect(pilha.pop()).toBe(undefined);
         expect(pilha.capacity()).toBeGreaterThan(0);
-    });
-
-    test("Ordem da remoção em Pilha", () => {
-        let pilha = new ArrayStack<string>();
 
         pilha.push("A");
         pilha.push("B");
@@ -29,10 +26,6 @@ describe("Testes em Pilha", () => {
 
         expect(pilha.size()).toBe(0);
         expect(pilha.isEmpty()).toBe(true);
-    });
-
-    test("Pilha clear()", () => {
-        let pilha = new ArrayStack<string>();
 
         pilha.push("A");
         pilha.push("B");
@@ -45,10 +38,6 @@ describe("Testes em Pilha", () => {
 
         expect(pilha.size()).toBe(0);
         expect(pilha.isEmpty()).toBe(true);
-    });
-
-    test("Adicionar e remover vários", () => {
-        let pilha = new ArrayStack<string>();
 
         pilha.push("A");
 
@@ -68,5 +57,17 @@ describe("Testes em Pilha", () => {
 
         expect(pilha.size()).toBe(0);
         expect(pilha.isEmpty()).toBe(true);
+    }
+
+    test("Testes arrayStack", () => {
+        testStack(new ArrayStack<string>());        
+    });
+
+    test("Testes linkedStack", () => {
+        testStack(new LinkedStack<string>());        
+    });
+
+    test("Testes DequeTest", () => {
+        testStack(new DequeTest<string>());        
     });
 });
