@@ -1,4 +1,6 @@
 dist/*
+!dist/.npmignore
+
 node_modules/
 .node_modules/
 built/*

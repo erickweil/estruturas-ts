@@ -1,7 +1,29 @@
 {
   "name": "estruturas-ts",
-  "version": "1.0.0",
-  "main": "main.js",
+  "description": "Estruturas de dados (Stack, Queue, LinkedList) implementadas em Typescript",
+  "version": "0.1.0",
+  "author": "Erick L. Weil",
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "data-structures",
+    "estruturas",
+    "queue",
+    "linked-list",
+    "stack"
+  ],
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erickweil/estruturas-ts.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
   "scripts": {
     "dev": "tsx watch ./main.ts",
     "build": "tsc",
@@ -12,10 +34,6 @@
   "jest": {
     "rootDir": "./dist"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "type": "module",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
