@@ -2,7 +2,7 @@ import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals
 import { ArrayStack } from "../../src/estruturas/arrayStack.js";
 import { Stack } from "../../src/interfaces/stack.js";
 import { LinkedStack } from "../../src/estruturas/linkedStack.js";
-import { DequeTest } from "../../src/interfaces/deque.js";
+import { ArrayDeque } from "../../src/estruturas/arrayDeque.js";
 
 describe("Testes em Pilha", () => {
 
@@ -68,6 +68,6 @@ describe("Testes em Pilha", () => {
     });
 
     test("Testes DequeTest", () => {
-        testStack(new DequeTest<string>());        
+        testStack(new ArrayDeque<string>());        
     });
 });

@@ -1,15 +1,21 @@
 import { Queue } from "../interfaces/queue.js";
 
-export class ArrayQueue<T> implements Queue<T> {
-    private inicio: number;
-    private fim: number;
-    private arr: (T | undefined)[];
+const DEFAULT_CAPACITY = 15;
 
-    constructor(capacidade: number = 15) {
+export class ArrayQueue<T> implements Queue<T> {
+    protected inicio: number;
+    protected fim: number;
+    protected arr: (T | undefined)[];
+
+    constructor(capacidade: number = DEFAULT_CAPACITY) {
         this.inicio = 0;
         this.fim = 0;
         // Inicializa com undefined para evitar array com buracos
         this.arr = new Array(capacidade+1).fill(undefined);
+    }
+
+    protected incrementar(cont: number) {
+        return (cont + 1) % this.arr.length;
     }
 
     resize() {
@@ -31,10 +37,6 @@ export class ArrayQueue<T> implements Queue<T> {
             }
             this.fim = oldlength + this.fim;
         }
-    }
-
-    private incrementar(cont: number) {
-        return (cont + 1) % this.arr.length;
     }
 
     addLast(valor: T) {
@@ -68,12 +70,14 @@ export class ArrayQueue<T> implements Queue<T> {
     }
 
     clear() {
-        while(this.inicio !== this.fim) {
+        /*while(this.inicio !== this.fim) {
             this.arr[this.inicio] = undefined;
             this.inicio = this.incrementar(this.inicio);
-        }
+        }*/
         this.inicio = 0;
         this.fim = 0;
+
+        this.arr = new Array(DEFAULT_CAPACITY+1).fill(undefined);
     }
 
     isEmpty(): boolean {

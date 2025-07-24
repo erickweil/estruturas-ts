@@ -2,8 +2,8 @@ import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals
 import { ArrayQueue } from "../../src/estruturas/arrayQueue.js";
 import { Queue } from "../../src/interfaces/queue.js";
 import { DualStackQueue } from "../../src/estruturas/dualStackQueue.js";
-import { DequeTest } from "../../src/interfaces/deque.js";
 import { testQueue } from "./filaTest.js";
+import { ArrayDeque } from "../../src/estruturas/arrayDeque.js";
 
 describe("Testes em Fila", () => {
     test("ArrayQueue: Testes Fila padrão", async () => {
@@ -15,7 +15,7 @@ describe("Testes em Fila", () => {
     });
 
     test("DequeTest: Testes Fila padrão", async () => {
-        testQueue(new DequeTest<string>());
+        testQueue(new ArrayDeque<string>());
     });
 
     test("Teste redimensionar fila cheia", async () => {
