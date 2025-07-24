@@ -91,4 +91,13 @@ export class ArrayQueue<T> implements Queue<T> {
     capacity(): number {
         return this.arr.length - 1;
     }
+
+    // Implementação do protocolo iterável para permitir for...of
+    public *[Symbol.iterator](): Iterator<T> {
+        let index = this.inicio;
+        while(index !== this.fim) {
+            yield this.arr[index]!;
+            index = this.incrementar(index);
+        }
+    }
 }

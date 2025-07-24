@@ -24,5 +24,12 @@ export class ArrayStack<T> implements Stack<T> {
     }
     capacity(): number {
         return Infinity;
-    }    
+    }
+
+    // Implementação do protocolo iterável para permitir for...of
+    public *[Symbol.iterator](): Iterator<T> {
+        for(let i = this.arr.length - 1; i >= 0; i--) {
+            yield this.arr[i];
+        }
+    }
 }

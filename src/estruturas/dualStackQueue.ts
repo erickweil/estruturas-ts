@@ -85,4 +85,14 @@ export class DualStackQueue<T> implements Queue<T> {
     size() {
         return this.entrada.length + this.saida.length;
     }
+
+    // Implementação do protocolo iterável para permitir for...of
+    public *[Symbol.iterator](): Iterator<T> {
+        for(let i = this.saida.length - 1; i >= 0; i--) {
+            yield this.saida[i];
+        }
+        for (const item of this.entrada) {
+            yield item;
+        }
+    }
 }

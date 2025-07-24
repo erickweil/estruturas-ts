@@ -1,6 +1,6 @@
 import { List } from "../interfaces/list.js";
 
-export class No<T> {
+class No<T> {
     valor: T;
     proximo: No<T> | null;
     anterior: No<T> | null;
@@ -24,24 +24,24 @@ export class LinkedList<T> implements List<T> {
     }
 
     private _get(index: number): No<T> | null {
-        let atual: No<T> | null;
+        if (index < 0 || index >= this.tamanho) {
+            return null;
+        }
+
+        let atual: No<T>;
 
         // Otimização: começar do início ou fim dependendo da posição
         let i: number;
         if (index <= this.tamanho / 2) {
-            atual = this.inicio;
-            for (i = 0; i < index && atual; i++) {
-                atual = atual.proximo;
+            atual = this.inicio!;
+            for (i = 0; i < index; i++) {
+                atual = atual.proximo!;
             }
         } else {
-            atual = this.fim;
-            for (i = this.tamanho - 1; i > index && atual; i--) {
-                atual = atual.anterior;
+            atual = this.fim!;
+            for (i = this.tamanho - 1; i > index; i--) {
+                atual = atual.anterior!;
             }
-        }
-
-        if(i !== index) {
-            return null; // Índice fora do intervalo
         }
 
         return atual;
@@ -152,5 +152,14 @@ export class LinkedList<T> implements List<T> {
     }
     capacity(): number {
         return Infinity;
+    }
+
+    // Implementação do protocolo iterável para permitir for...of
+    public *[Symbol.iterator](): Iterator<T> {
+        let atual = this.inicio;
+        while (atual) {
+            yield atual.valor;
+            atual = atual.proximo;
+        }
     }
 }

@@ -56,4 +56,13 @@ export class LinkedStack<T> implements Stack<T> {
 
         return ret;
     }
+    
+    // Implementação do protocolo iterável para permitir for...of
+    public *[Symbol.iterator](): Iterator<T> {
+        let atual = this.inicio;
+        while (atual) {
+            yield atual.valor;
+            atual = atual.proximo;
+        }
+    }
 }
