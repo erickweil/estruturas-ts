@@ -27,16 +27,21 @@ export class LinkedList<T> implements List<T> {
         let atual: No<T> | null;
 
         // Otimização: começar do início ou fim dependendo da posição
+        let i: number;
         if (index <= this.tamanho / 2) {
             atual = this.inicio;
-            for (let i = 0; i < index && atual; i++) {
+            for (i = 0; i < index && atual; i++) {
                 atual = atual.proximo;
             }
         } else {
             atual = this.fim;
-            for (let i = this.tamanho - 1; i > index && atual; i--) {
+            for (i = this.tamanho - 1; i > index && atual; i--) {
                 atual = atual.anterior;
             }
+        }
+
+        if(i !== index) {
+            return null; // Índice fora do intervalo
         }
 
         return atual;

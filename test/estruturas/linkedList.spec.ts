@@ -1,17 +1,25 @@
 import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
 import { List } from "../../src/interfaces/list.js";
-import { DoublyLinkedList6 } from "../../src/estruturas/linkedList/grupo6.js";
 import { testQueue } from "./filaTest.js";
 import { testDeque } from "./dequeTest.js";
-import { DoublyLinkedList1 } from "../../src/estruturas/linkedList/grupo1.js";
-import { DoubleLinkedList7 } from "../../src/estruturas/linkedList/grupo7.js";
-import { LinkedList2 } from "../../src/estruturas/linkedList/grupo2.js";
-import { DoublyLinkedList3 } from "../../src/estruturas/linkedList/grupo3.js";
-import { DoublyLinkedList5 } from "../../src/estruturas/linkedList/grupo5.js";
-import { DoublyLinkedList4 } from "../../src/estruturas/linkedList/grupo4.js";
+import { LinkedList } from "../../src/estruturas/linkedList.js";
+
+function expectList(list: List<string>, values: string[]) {
+    expect(list.size()).toBe(values.length);
+    expect(list.isEmpty()).toBe(values.length === 0);
+
+    expect(list.peekFirst()).toBe(values[0]);
+    expect(list.peekLast()).toBe(values[values.length - 1]);
+
+    for (let i = 0; i < values.length; i++) {
+        expect(list.get(i)).toBe(values[i]);
+    }
+    expect(list.get(100000)).toBe(undefined);
+    expect(list.get(values.length)).toBe(undefined);
+    expect(list.get(-1)).toBe(undefined);
+}
 
 function testList(list: List<string>) {
-
     expect(list.remove(0)).toBe(undefined);
     expect(list.get(0)).toBe(undefined);
 
@@ -19,140 +27,73 @@ function testList(list: List<string>) {
     expect(list.size()).toBe(1);
 
     list.clear();
+    list.addLast("B");
+    list.addLast("C");
+    list.addLast("D");
     list.addLast("E");
     list.addLast("F");
-    list.add("C", 0);
-    list.add("A", 0);
-    
-    list.add("B", 1);
-    list.add("D", 3);
 
-    expect(list.size()).toBe(6);
-    expect(list.peekFirst()).toBe("A");
-    expect(list.peekLast()).toBe("F");
+    expectList(list, ["B", "C", "D", "E", "F"]);
+
+    // Add
+    list.addFirst("A");
+    expectList(list, ["A", "B", "C", "D", "E", "F"]);
+
+    list.addLast("H");
+    expectList(list, ["A", "B", "C", "D", "E", "F", "H"]);
+
+    list.add("G", 6);
+    expectList(list, ["A", "B", "C", "D", "E", "F", "G", "H"]);
+
+    list.add("Z", 0);
+    expectList(list, ["Z", "A", "B", "C", "D", "E", "F", "G", "H"]);
+
+    list.add("I", 9);
+    expectList(list, ["Z", "A", "B", "C", "D", "E", "F", "G", "H", "I"]);
+    
+    // Remove
+    expect(list.removeFirst()).toBe("Z");
+    expectList(list, ["A", "B", "C", "D", "E", "F", "G", "H", "I"]);
+
+    expect(list.removeLast()).toBe("I");
+    expectList(list, ["A", "B", "C", "D", "E", "F", "G", "H"]);
 
     expect(list.remove(0)).toBe("A");
+    expectList(list, ["B", "C", "D", "E", "F", "G", "H"]);
 
-    expect(list.size()).toBe(5);
-    expect(list.peekFirst()).toBe("B");
-    expect(list.peekLast()).toBe("F");
+    expect(list.remove(3)).toBe("E");
+    expectList(list, ["B", "C", "D", "F", "G", "H"]);
 
-    expect(list.get(0)).toBe("B");
-    expect(list.get(1)).toBe("C");
-    expect(list.get(2)).toBe("D");
-    expect(list.get(3)).toBe("E");
-    expect(list.get(4)).toBe("F");
+    expect(list.remove(5)).toBe("H");
+    expectList(list, ["B", "C", "D", "F", "G"]);
 
-    expect(list.remove(2)).toBe("D");
+    expect(list.remove(5)).toBe(undefined);
+    expectList(list, ["B", "C", "D", "F", "G"]);
 
-    expect(list.size()).toBe(4);
-    expect(list.get(0)).toBe("B");
-    expect(list.get(1)).toBe("C");
-    expect(list.get(2)).toBe("E");
-    expect(list.get(3)).toBe("F");
+    while (!list.isEmpty()) {
+        expect(list.removeLast()).toBeTruthy();
+    }
 
-    expect(list.remove(3)).toBe("F");
+    expectList(list, []);
+    expect(list.removeFirst()).toBe(undefined);
+    expect(list.removeLast()).toBe(undefined);
+    expect(list.get(0)).toBe(undefined);
+
+    // Teste add throws
+    expect(() => list.add("X", -1)).toThrowError();
+    expect(() => list.add("X", 100)).toThrowError();
 }
 
-describe("Teste Grupo 6", () => {
-    test("Teste Grupo 6: LinkeList", () => {
-        testList(new DoublyLinkedList6());
+describe("Teste Linked List", () => {
+    test("Teste métodos linked list", () => {
+        testList(new LinkedList());
     });
 
-    test("Teste Grupo 6: Queue", () => {
-        testQueue(new DoublyLinkedList6());
+    test("Teste médotodos fila", () => {
+        testQueue(new LinkedList());
     });
 
-    test("Teste Grupo 6: Deque", () => {
-        testDeque(new DoublyLinkedList6());
-    });
-});
-
-describe("Teste Grupo 1", () => {
-    test("Teste Grupo 1: LinkeList", () => {
-        testList(new DoublyLinkedList1());
-    });
-
-    test("Teste Grupo 1: Queue", () => {
-        testQueue(new DoublyLinkedList1());
-    });
-
-    test("Teste Grupo 1: Deque", () => {
-        testDeque(new DoublyLinkedList1());
-    });
-});
-
-
-describe("Teste Grupo 7", () => {
-    test("Teste Grupo 7: LinkeList", () => {
-        testList(new DoubleLinkedList7());
-    });
-
-    test("Teste Grupo 7: Queue", () => {
-        testQueue(new DoubleLinkedList7());
-    });
-
-    test("Teste Grupo 7: Deque", () => {
-        testDeque(new DoubleLinkedList7());
-    });
-});
-
-
-describe("Teste Grupo 2", () => {
-    test("Teste Grupo 2: LinkeList", () => {
-        testList(new LinkedList2());
-    });
-
-    test("Teste Grupo 2: Queue", () => {
-        testQueue(new LinkedList2());
-    });
-
-    test("Teste Grupo 2: Deque", () => {
-        testDeque(new LinkedList2());
-    });
-});
-
-
-describe("Teste Grupo 3", () => {
-    test("Teste Grupo 3: LinkeList", () => {
-        testList(new DoublyLinkedList3());
-    });
-
-    test("Teste Grupo 3: Queue", () => {
-        testQueue(new DoublyLinkedList3());
-    });
-
-    test("Teste Grupo 3: Deque", () => {
-        testDeque(new DoublyLinkedList3());
-    });
-});
-
-
-describe("Teste Grupo 5", () => {
-    test("Teste Grupo 5: LinkeList", () => {
-        testList(new DoublyLinkedList5());
-    });
-
-    test("Teste Grupo 5: Queue", () => {
-        testQueue(new DoublyLinkedList5());
-    });
-
-    test("Teste Grupo 5: Deque", () => {
-        testDeque(new DoublyLinkedList5());
-    });
-});
-
-
-describe("Teste Grupo 4", () => {
-    test("Teste Grupo 4: LinkeList", () => {
-        testList(new DoublyLinkedList4());
-    });
-
-    test("Teste Grupo 4: Queue", () => {
-        testQueue(new DoublyLinkedList4());
-    });
-
-    test("Teste Grupo 4: Deque", () => {
-        testDeque(new DoublyLinkedList4());
+    test("Teste métodos deque", () => {
+        testDeque(new LinkedList());
     });
 });

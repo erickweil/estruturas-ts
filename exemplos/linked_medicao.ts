@@ -1,24 +1,19 @@
 import { ArrayQueue } from "../src/estruturas/arrayQueue.js";
 import { DualStackQueue } from "../src/estruturas/dualStackQueue.js";
-import { DoublyLinkedList1 } from "../src/estruturas/linkedList/grupo1.js";
-import { LinkedList2 } from "../src/estruturas/linkedList/grupo2.js";
-import { DoublyLinkedList3 } from "../src/estruturas/linkedList/grupo3.js";
-import { DoublyLinkedList4 } from "../src/estruturas/linkedList/grupo4.js";
-import { DoublyLinkedList5 } from "../src/estruturas/linkedList/grupo5.js";
-import { DoublyLinkedList6 } from "../src/estruturas/linkedList/grupo6.js";
-import { DoubleLinkedList7 } from "../src/estruturas/linkedList/grupo7.js";
+import { LinkedList } from "../src/estruturas/linkedList.js";
 import { List } from "../src/interfaces/list.js";
 const N = 10_000;
 
 function criarListas(): List<number>[] {
     return [
-        new DoublyLinkedList1(),
-        new LinkedList2(),
-        new DoublyLinkedList3(),
-        new DoublyLinkedList4(),
-        new DoublyLinkedList5(),
-        new DoublyLinkedList6(),
-        new DoubleLinkedList7()
+        //new DoublyLinkedList1(),
+        //new LinkedList2(),
+        //new DoublyLinkedList3(),
+        //new DoublyLinkedList4(),
+        //new DoublyLinkedList5(),
+        //new DoublyLinkedList6(),
+        //new DoubleLinkedList7(),
+        new LinkedList()
     ]
 }
 
@@ -34,8 +29,10 @@ function printMedicao(inicio: bigint, mensagem: string) {
 
 function medirAdd(list: List<number>, medicao: number) {
     for(let iter = 0; iter < N * medicao; iter++) {
-        list.addLast(iter);
+        list.add(Math.floor(Math.random() * 100), Math.floor(Math.random() * list.size()));
         list.get(Math.floor(Math.random() * list.size()));
+        if(iter % 2 === 0)
+        list.remove(Math.floor(Math.random() * list.size()));
     }
 }
 
