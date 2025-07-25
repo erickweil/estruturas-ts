@@ -2,7 +2,7 @@ import { ArrayDeque } from "../src/estruturas/arrayDeque.js";
 import { ArrayQueue } from "../src/estruturas/arrayQueue.js";
 import { DualStackQueue } from "../src/estruturas/dualStackQueue.js";
 import { LinkedList } from "../src/estruturas/linkedList.js";
-import { PoolList } from "../src/estruturas/poolList.js";
+//import { PoolList } from "../src/estruturas/poolList.js";
 import { Deque } from "../src/interfaces/deque.js";
 import { List } from "../src/interfaces/list.js";
 const N = 100_000;
@@ -19,7 +19,7 @@ function criarListas(): Deque<unknown>[] {
 
         new ArrayDeque(),
         new LinkedList(),
-        new PoolList()
+        //new PoolList()
     ]
 }
 

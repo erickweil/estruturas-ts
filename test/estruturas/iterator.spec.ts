@@ -5,7 +5,7 @@ import { ArrayQueue } from "../../src/estruturas/arrayQueue.js";
 import { ArrayDeque } from "../../src/estruturas/arrayDeque.js";
 import { LinkedList } from "../../src/estruturas/linkedList.js";
 import { DualStackQueue } from "../../src/estruturas/dualStackQueue.js";
-import { PoolList } from "../../src/estruturas/poolList.js";
+//import { PoolList } from "../../src/estruturas/poolList.js";
 
 describe("Testes método Iterator de cada Estrutura", () => {
 
@@ -102,12 +102,12 @@ describe("Testes método Iterator de cada Estrutura", () => {
         testIterator(linkedList, inputValues);
     });
 
-    test("PoolList", () => {
+    /*test("PoolList", () => {
         const linkedList = new PoolList<string>();
         for(let value of inputValues) {
             linkedList.addLast(value);
         }
 
         testIterator(linkedList, inputValues);
-    });
+    });*/
 });

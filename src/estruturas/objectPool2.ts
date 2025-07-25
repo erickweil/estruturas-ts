@@ -12,9 +12,9 @@
  */
 const NULL_INDEX = -1;
 
-/*export interface PoolNode {
+export interface PoolNode {
     _index?: number | undefined; // se tiver o valor, é o próximo nó vazio, se for undefined, é um nó válido
-};*/
+};
 
 /**
  * Object pooling
@@ -35,37 +35,42 @@ const NULL_INDEX = -1;
  * - Slab (https://github.com/tokio-rs/slab)
  * - https://www.reddit.com/r/rust/comments/gfo1uw/benchmarking_slotmap_slab_stable_vec_etc/
  */
-export class ObjectPool<T> {
+export class ObjectPool<T extends PoolNode> {
     private arr: T[];
     private length: number;
-    private freeSlots: number[]; // Pilha de nós vazios
+    private lastEmpty: number; // Índice do último nó vazio
     private factory: () => T;
     constructor(factory: () => T) {
         this.arr = [];
         this.length = 0;
-        this.freeSlots = []; // Inicialmente não há nós vazios
+        this.lastEmpty = NULL_INDEX; // Inicialmente não há nós vazios
         this.factory = factory; // Fallback para criar um nó vazio
     }
 
     /**
      * Aloca um novo objeto no pool, reutilizando um espaço vazio se disponível.
      */
-    public allocNode(): [T, number] {
-        if (this.freeSlots.length === 0) {
+    public allocNode(): T {
+        if (this.lastEmpty === NULL_INDEX) {
             // Não há nenhum espaço vazio, adiciona um novo no final do array.
             const newNode = this.factory(); // Cria um novo nó vazio
+            newNode._index = this.arr.length;
             this.arr.push(newNode); // Cria um novo nó vazio
             this.length++;
 
-            return [newNode, this.arr.length - 1]; // Retorna o índice do novo nó
+            return newNode; // Retorna o índice do novo nó
         } else {
             // Reutiliza um espaço vazio (faz "pop" da pilha de vazios).
-            const freeNodeIndex = this.freeSlots.pop()!;
+            //const freeNodeIndex = this.freeSlots.pop()!;
+            const freeNodeIndex = this.lastEmpty;
             const node = this.arr[freeNodeIndex]
+            this.lastEmpty = node._index!;
+            node._index = freeNodeIndex;
+
             this.length++;
             
             // Re-incializar os valores
-            return [node, freeNodeIndex]; // Retorna o nó e o índice do nó
+            return node;
         }
     }
 
@@ -75,16 +80,20 @@ export class ObjectPool<T> {
      * Obs: Mas não irá apagar seu conteúdo, apenas marca como vazio.
      */
     public freeNode(node: number): T | null {
+        const value = this.arr[node];
         //if(!value || value._index !== undefined) {
             //return null;
         //}
 
         // Transforma o nó em um nó vazio.
         // - fazer push() na pilha de valores vazios
-        this.freeSlots.push(node);
+        //this.freeSlots.push(node);
+        value._index = this.lastEmpty; // O próximo nó vazio será o antigo topo da pilha
+        this.lastEmpty = node; // Atualiza o topo da pilha de vazios
+
         this.length--;
 
-        return this.arr[node];
+        return value;
     }
 
     /**
@@ -101,6 +110,6 @@ export class ObjectPool<T> {
     public clear(): void {
         this.arr = [];
         this.length = 0;
-        this.freeSlots = []; // Limpa a pilha de nós vazios
+        this.lastEmpty = NULL_INDEX; // Reseta o topo da pilha de vazios
     }
 }
