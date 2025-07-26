@@ -5,66 +5,58 @@ import { ArrayStack } from "../src/estruturas/arrayStack.js";
 import { DualStackQueue } from "../src/estruturas/dualStackQueue.js";
 import { LinkedList } from "../src/estruturas/linkedList.js";
 import { LinkedStack } from "../src/estruturas/linkedStack.js";
-import { ObjectPool } from "../src/estruturas/objectPool.js";
+import { ObjectPool, PoolNode } from "../src/estruturas/objectPool2.js";
 //import { PoolList } from "../src/estruturas/poolList.js";
 import { Deque } from "../src/interfaces/deque.js";
 import { List } from "../src/interfaces/list.js";
 import { Queue } from "../src/interfaces/queue.js";
 import { Stack } from "../src/interfaces/stack.js";
-const N = 100_000;
+import { NumberPool } from '../src/estruturas/numberPool.js';
+const N = 50_000;
 
-interface Bucket {
-    value: any;
-    next: number; // Índice do próximo nó
-};
-
-class PoolQueue<T extends Bucket> implements Queue<T> {
-    pool: ObjectPool<T>;
+class PoolQueue implements Queue<number> {
+    pool: NumberPool;
     
     private front: number;
     private rear: number;
 
-    constructor() {
-        this.pool = new ObjectPool(() => ({
-            next: -1,
-            value: -1
-        } as T
-        ));
-        
+    constructor(capacity: number = N) {
+        this.pool = new NumberPool(capacity, 2);
         this.front = -1; // Índice do primeiro elemento
         this.rear = -1; // Índice do último elemento
     }
     
-    addLast(valor: T): void {
-        const [node, index] = this.pool.allocNode();
-        node.value = valor;
-        node.next = -1; // Inicialmente não aponta para nenhum próximo
+    addLast(valor: number): void {
+        const node = this.pool.allocNode();
+        this.pool.setValue(node, 0, valor);
+        this.pool.setValue(node, 1, -1);
+        //this.pool.setValues(node, valor, -1); // O próximo do nó será -1 (nada)
 
         if (this.rear === -1) {
             // Se a fila está vazia, o primeiro elemento é o front e rear
-            this.front = index;
-            this.rear = index;
+            this.front = node;
+            this.rear = node;
         } else {
             // Caso contrário, adiciona ao final da fila
-            const rearNode = this.pool.get(this.rear)!;
-            rearNode.next = index; // O próximo do antigo rear será o novo nó
-            this.rear = index; // Atualiza o rear para o novo nó
+            this.pool.setValue(this.rear, 1, node); // O próximo do antigo rear será o novo nó
+            this.rear = node; // Atualiza o rear para o novo nó
         }
     }
 
-    removeFirst(): T | undefined {
+    removeFirst(): number | undefined {
         if (this.front === -1) return undefined; // Fila vazia
 
-        const node = this.pool.freeNode(this.front)!;
-        const value = node.value;
+        const value = this.pool.getValue(this.front, 0); // Obtém o valor do nó no front
+        const next =  this.pool.getValue(this.front, 1); // Obtém o
+        this.pool.freeNode(this.front);
 
-        if (node.next === -1) {
+        if (next === -1) {
             // Se não há próximo, a fila ficará vazia
             this.front = -1;
             this.rear = -1;
         } else {
             // Move o front para o próximo nó
-            this.front = node.next;
+            this.front = next;
         }
         return value;
     }
@@ -84,7 +76,7 @@ class PoolQueue<T extends Bucket> implements Queue<T> {
 
     //     return node as T;
     // }
-    peekFirst(): T | undefined {
+    peekFirst(): number | undefined {
         throw new Error("Method not implemented.");
     }
     isEmpty(): boolean {
@@ -103,13 +95,13 @@ class PoolQueue<T extends Bucket> implements Queue<T> {
     }
 
     // for of
-    *[Symbol.iterator](): IterableIterator<T> {
+    *[Symbol.iterator](): IterableIterator<number> {
         let currentIndex = this.front;
         while (currentIndex !== -1) {
-            const node = this.pool.get(currentIndex);
+            const node = this.pool.getValue(currentIndex, 0);
             if (node) {
                 yield node;
-                currentIndex = node.next; // Move para o próximo nó
+                currentIndex = this.pool.getValue(currentIndex, 1); // Move para o próximo nó
             } else {
                 break; // Se não houver mais nós, sai do loop
             }
@@ -117,11 +109,11 @@ class PoolQueue<T extends Bucket> implements Queue<T> {
     }
 }
 
-function criarListas(): Queue<unknown>[] {
+function criarListas(capacity: number): Queue<unknown>[] {
     return [
-        new ArrayQueue(),
+        new ArrayQueue(capacity),
         new LinkedList(),
-        new PoolQueue()
+        new PoolQueue(capacity)
     ]
 }
 
@@ -153,17 +145,18 @@ function medirAdd(list: Queue<any>, medicao: number) {
     }
 
     // // 2. Medição: Adiciona e remove elementos repetidamente, sem alterar o tamanho da fila
-    // for(let iter = 0; iter < WARMUP_SIZE; iter++) {
-    //     list.addLast(list.removeFirst());
-    // }
+    for(let iter = 0; iter < WARMUP_SIZE; iter++) {
+        list.addLast(list.removeFirst());
+    }
 
-    //for (let iter = 0; iter < medicao; iter++) {
+    // 3. Atravessa a lista para garantir que os objetos estão acessíveis
+    /*//for (let iter = 0; iter < medicao; iter++) {
         for(let elem of (list as any)) {
             if(!elem) {
                 throw new Error("Elemento inválido na lista");
             }
         }
-    //}
+    //}*/
 }
 
 /*
@@ -184,25 +177,27 @@ async function runBenchmarkAndChart() {
 
     // 1. Estrutura para armazenar os resultados (tempo em ms) para cada classe
     const results = new Map<string, number[]>();
-    const queueImplementations = criarListas();
+    const queueImplementations = criarListas(N);
 
     // Inicializa o Map com o nome de cada implementação de fila
     for (const list of queueImplementations) {
         results.set(list.constructor.name, []);
     }
 
-    const MAX_MEDICOES = 100;
+    const MAX_MEDICOES = 20;
 
     // 2. Loop de benchmark para coletar os dados (sem imprimir na tela)
     for (let medicoes = 1; medicoes < MAX_MEDICOES; medicoes++) {
         // Exibe o progresso para o usuário não achar que o programa travou
         console.log(`Executando medição Nº ${medicoes}/${MAX_MEDICOES - 1}`);
 
-        const lists = criarListas(); // Recria as listas para um teste justo
+        const lists = criarListas(N * medicoes); // Recria as listas para um teste justo
         for (const lista of lists) {
             const className = lista.constructor.name;
 
             const inicio = iniciarMedicao();
+            medirAdd(lista as any, medicoes);
+            medirAdd(lista as any, medicoes);
             medirAdd(lista as any, medicoes);
             const fim = process.hrtime.bigint();
 
