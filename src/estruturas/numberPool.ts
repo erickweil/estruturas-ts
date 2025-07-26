@@ -7,6 +7,8 @@
  * em vez de alocar e desalocar memória constantemente.
  */
 
+import { Queue } from "../interfaces/queue.js";
+
 /**
  * Object pooling
  * 
@@ -107,5 +109,101 @@ export class NumberPool {
         // usando .length = 0 para limpar o array sem desalocar
         this.length = 0;
         this.freeSlots.length = 0;
+    }
+}
+
+
+export class NumberPoolQueue implements Queue<number> {
+    pool: NumberPool;
+    
+    private front: number;
+    private rear: number;
+
+    constructor(capacity: number) {
+        this.pool = new NumberPool(capacity, 2);
+        this.front = -1; // Índice do primeiro elemento
+        this.rear = -1; // Índice do último elemento
+    }
+    
+    addLast(valor: number): void {
+        const node = this.pool.allocNode();
+        this.pool.setValue(node, 0, valor);
+        this.pool.setValue(node, 1, -1);
+        //this.pool.setValues(node, valor, -1); // O próximo do nó será -1 (nada)
+
+        if (this.rear === -1) {
+            // Se a fila está vazia, o primeiro elemento é o front e rear
+            this.front = node;
+            this.rear = node;
+        } else {
+            // Caso contrário, adiciona ao final da fila
+            this.pool.setValue(this.rear, 1, node); // O próximo do antigo rear será o novo nó
+            this.rear = node; // Atualiza o rear para o novo nó
+        }
+    }
+
+    removeFirst(): number | undefined {
+        if (this.front === -1) return undefined; // Fila vazia
+
+        const value = this.pool.getValue(this.front, 0); // Obtém o valor do nó no front
+        const next =  this.pool.getValue(this.front, 1); // Obtém o
+        this.pool.freeNode(this.front);
+
+        if (next === -1) {
+            // Se não há próximo, a fila ficará vazia
+            this.front = -1;
+            this.rear = -1;
+        } else {
+            // Move o front para o próximo nó
+            this.front = next;
+        }
+        return value;
+    }
+
+    // push(v: any): void {
+    //     const [node, index] = this.pool.allocNode();
+    //     node.value = v;
+    //     node.next = this.top; // O próximo será o antigo topo
+        
+    //     this.top = index;
+    // }
+    // pop(): T | undefined {
+    //     if (this.top === -1) return undefined;
+
+    //     const node = this.pool.freeNode(this.top)!;
+    //     this.top = node.next!;
+
+    //     return node as T;
+    // }
+    peekFirst(): number | undefined {
+        throw new Error("Method not implemented.");
+    }
+    isEmpty(): boolean {
+        throw new Error("Method not implemented.");
+    }
+    clear(): void {
+        this.pool.clear();
+        this.front = -1;
+        this.rear = -1;
+    }
+    size(): number {
+        return this.pool.size();
+    }
+    capacity(): number {
+        throw new Error("Method not implemented.");
+    }
+
+    // for of
+    *[Symbol.iterator](): IterableIterator<number> {
+        let currentIndex = this.front;
+        while (currentIndex !== -1) {
+            const node = this.pool.getValue(currentIndex, 0);
+            if (node) {
+                yield node;
+                currentIndex = this.pool.getValue(currentIndex, 1); // Move para o próximo nó
+            } else {
+                break; // Se não houver mais nós, sai do loop
+            }
+        }
     }
 }

@@ -11,109 +11,16 @@ import { Deque } from "../src/interfaces/deque.js";
 import { List } from "../src/interfaces/list.js";
 import { Queue } from "../src/interfaces/queue.js";
 import { Stack } from "../src/interfaces/stack.js";
-import { NumberPool } from '../src/estruturas/numberPool.js';
-const N = 50_000;
-
-class PoolQueue implements Queue<number> {
-    pool: NumberPool;
-    
-    private front: number;
-    private rear: number;
-
-    constructor(capacity: number = N) {
-        this.pool = new NumberPool(capacity, 2);
-        this.front = -1; // Índice do primeiro elemento
-        this.rear = -1; // Índice do último elemento
-    }
-    
-    addLast(valor: number): void {
-        const node = this.pool.allocNode();
-        this.pool.setValue(node, 0, valor);
-        this.pool.setValue(node, 1, -1);
-        //this.pool.setValues(node, valor, -1); // O próximo do nó será -1 (nada)
-
-        if (this.rear === -1) {
-            // Se a fila está vazia, o primeiro elemento é o front e rear
-            this.front = node;
-            this.rear = node;
-        } else {
-            // Caso contrário, adiciona ao final da fila
-            this.pool.setValue(this.rear, 1, node); // O próximo do antigo rear será o novo nó
-            this.rear = node; // Atualiza o rear para o novo nó
-        }
-    }
-
-    removeFirst(): number | undefined {
-        if (this.front === -1) return undefined; // Fila vazia
-
-        const value = this.pool.getValue(this.front, 0); // Obtém o valor do nó no front
-        const next =  this.pool.getValue(this.front, 1); // Obtém o
-        this.pool.freeNode(this.front);
-
-        if (next === -1) {
-            // Se não há próximo, a fila ficará vazia
-            this.front = -1;
-            this.rear = -1;
-        } else {
-            // Move o front para o próximo nó
-            this.front = next;
-        }
-        return value;
-    }
-
-    // push(v: any): void {
-    //     const [node, index] = this.pool.allocNode();
-    //     node.value = v;
-    //     node.next = this.top; // O próximo será o antigo topo
-        
-    //     this.top = index;
-    // }
-    // pop(): T | undefined {
-    //     if (this.top === -1) return undefined;
-
-    //     const node = this.pool.freeNode(this.top)!;
-    //     this.top = node.next!;
-
-    //     return node as T;
-    // }
-    peekFirst(): number | undefined {
-        throw new Error("Method not implemented.");
-    }
-    isEmpty(): boolean {
-        throw new Error("Method not implemented.");
-    }
-    clear(): void {
-        this.pool.clear();
-        this.front = -1;
-        this.rear = -1;
-    }
-    size(): number {
-        return this.pool.size();
-    }
-    capacity(): number {
-        throw new Error("Method not implemented.");
-    }
-
-    // for of
-    *[Symbol.iterator](): IterableIterator<number> {
-        let currentIndex = this.front;
-        while (currentIndex !== -1) {
-            const node = this.pool.getValue(currentIndex, 0);
-            if (node) {
-                yield node;
-                currentIndex = this.pool.getValue(currentIndex, 1); // Move para o próximo nó
-            } else {
-                break; // Se não houver mais nós, sai do loop
-            }
-        }
-    }
-}
+import { NumberPoolQueue } from '../src/estruturas/numberPool.js';
+import { BufferPoolQueue } from '../src/estruturas/bufferPool.js';
+const N = 100_000;
 
 function criarListas(capacity: number): Queue<unknown>[] {
     return [
         new ArrayQueue(capacity),
+        new BufferPoolQueue(capacity),
+        new NumberPoolQueue(capacity),
         new LinkedList(),
-        new PoolQueue(capacity)
     ]
 }
 
@@ -198,7 +105,6 @@ async function runBenchmarkAndChart() {
             const inicio = iniciarMedicao();
             medirAdd(lista as any, medicoes);
             medirAdd(lista as any, medicoes);
-            medirAdd(lista as any, medicoes);
             const fim = process.hrtime.bigint();
 
             // Converte para número e armazena o resultado
@@ -221,8 +127,9 @@ async function runBenchmarkAndChart() {
         height: 30, // Altura do gráfico em linhas
         colors: [   // Define cores para cada linha do gráfico
             asciichart.green, // ArrayQueue
-            asciichart.red,   // LinkedList
+            asciichart.yellow, // BufferPoolQueue
             asciichart.blue,  // PoolQueue
+            asciichart.red,   // LinkedList
         ]
     };
 
@@ -232,8 +139,10 @@ async function runBenchmarkAndChart() {
     // 4. Imprime uma legenda clara para o gráfico
     console.log("\nLegenda:");
     console.log("ArrayQueue: Verde");
-    console.log("LinkedList: Vermelho");
+    console.log("BufferPoolQueue: Amarelo");
     console.log("PoolQueue: Azul");
+    console.log("LinkedList: Vermelho");
+
     console.log("\nEixo X: Nº da Medição (Carga de Trabalho Crescente)");
     console.log("Eixo Y: Tempo de Execução (ms)");
 
