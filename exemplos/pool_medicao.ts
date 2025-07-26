@@ -12,15 +12,59 @@ import { List } from "../src/interfaces/list.js";
 import { Queue } from "../src/interfaces/queue.js";
 import { Stack } from "../src/interfaces/stack.js";
 import { NumberPoolQueue } from '../src/estruturas/numberPool.js';
-import { BufferPoolQueue } from '../src/estruturas/bufferPool.js';
+import { bType, BufferPoolQueue, StructSchema } from '../src/estruturas/bufferPool.js';
 const N = 100_000;
 
-function criarListas(capacity: number): Queue<unknown>[] {
+function createPayload(i: number) {
+    return i;
+
+    /*return {
+        value: Math.random() * 100,
+        arr: [Math.random() * 100, Math.random() * 100, Math.random() * 100],
+        name: `N ${i}`,
+    };*/
+}
+type Payload = ReturnType<typeof createPayload>;
+
+function criarListas(capacity: number): Queue<Payload>[] {
+    const poolSchema = 
+    /*{
+        arr: bType.array(3, bType.int32()),
+        value: bType.float32(),
+        name: bType.string(10),
+     } satisfies StructSchema;
+    */
+    {
+        n: bType.int32(),
+    } satisfies StructSchema;
+
     return [
-        new ArrayQueue(capacity),
-        new BufferPoolQueue(capacity),
-        new NumberPoolQueue(capacity),
-        new LinkedList(),
+        new ArrayQueue<Payload>(capacity),
+        //new NumberPoolQueue(capacity),
+        new BufferPoolQueue<Payload, typeof poolSchema>(capacity, poolSchema, 
+            (pool, index) => {
+                return pool.get.value.n(index);
+                /*return {
+                    arr: [
+                        pool.get.value.arr[0](index),
+                        pool.get.value.arr[1](index),
+                        pool.get.value.arr[2](index)
+                    ],
+                    value: pool.get.value.value(index),
+                    name: pool.get.value.name(index),
+                };*/
+            },
+            (pool, index, value) => {
+                pool.set.value.n(index, value);
+                /*pool.set.value.arr[0](index, value.arr[0]);
+                pool.set.value.arr[1](index, value.arr[1]);
+                pool.set.value.arr[2](index, value.arr[2]);
+                pool.set.value.value(index, value.value);
+                pool.set.value.name(index, value.name);*/
+            }
+        ),
+
+        new LinkedList<Payload>(),
     ]
 }
 
@@ -34,15 +78,7 @@ function printMedicao(inicio: bigint, mensagem: string) {
     console.log(`${mensagem}${ms}`);
 }
 
-function createPayload(i: number) {
-    /*return {
-        id: i,
-        value: Math.random() * 100,
-    };*/
-    return i;
-}
-
-function medirAdd(list: Queue<any>, medicao: number) {
+function medirAdd(list: Queue<Payload>, medicao: number) {
     list.clear();
     const WARMUP_SIZE = N * medicao;
     
@@ -53,7 +89,7 @@ function medirAdd(list: Queue<any>, medicao: number) {
 
     // // 2. Medição: Adiciona e remove elementos repetidamente, sem alterar o tamanho da fila
     for(let iter = 0; iter < WARMUP_SIZE; iter++) {
-        list.addLast(list.removeFirst());
+       list.addLast(list.removeFirst()!);
     }
 
     // 3. Atravessa a lista para garantir que os objetos estão acessíveis
@@ -128,7 +164,7 @@ async function runBenchmarkAndChart() {
         colors: [   // Define cores para cada linha do gráfico
             asciichart.green, // ArrayQueue
             asciichart.yellow, // BufferPoolQueue
-            asciichart.blue,  // PoolQueue
+            //asciichart.blue,  // PoolQueue
             asciichart.red,   // LinkedList
         ]
     };
@@ -140,7 +176,7 @@ async function runBenchmarkAndChart() {
     console.log("\nLegenda:");
     console.log("ArrayQueue: Verde");
     console.log("BufferPoolQueue: Amarelo");
-    console.log("PoolQueue: Azul");
+    //console.log("PoolQueue: Azul");
     console.log("LinkedList: Vermelho");
 
     console.log("\nEixo X: Nº da Medição (Carga de Trabalho Crescente)");

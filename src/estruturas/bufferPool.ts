@@ -64,8 +64,8 @@ export type RecursiveSetters<T extends StructSchema> = {
 };
 
 // https://stackoverflow.com/questions/52489261/can-i-define-an-n-length-tuple-type
-type Tuple<T, N, R extends T[] = []> = R['length'] extends N ? R : Tuple<T, N, [...R, T]>;
-type SizedObject<N extends number, T> = Omit<Tuple<T, N>, keyof []>;
+//type Tuple<T, N, R extends T[] = []> = R['length'] extends N ? R : Tuple<T, N, [...R, T]>;
+//type SizedObject<N extends number, T> = Omit<Tuple<T, N>, keyof []>;
 
 class Int8 extends BinaryType<number> {
     size() { return Int8Array.BYTES_PER_ELEMENT }
@@ -139,22 +139,34 @@ class Float64 extends BinaryType<number> {
 }
 
 class bString extends BinaryType<string> {
-    private static readonly textEncoder: TextEncoder = new TextEncoder();
-    private static readonly textDecoder: TextDecoder = new TextDecoder();
     constructor(private readonly length: number) {
         super();
     }
     size() { return this.length * Uint8Array.BYTES_PER_ELEMENT; }
     get(pool: BufferPool<any>, fieldOffset: number) {
         return (index: number) => {
-            const bytes = new Uint8Array(pool.arr, index * pool.stride + fieldOffset, this.length);
-            return bString.textDecoder.decode(bytes);
+            // https://josephmate.github.io/2020-07-27-javascript-does-not-need-stringbuilder/
+            let str = "";
+            for (let i = 0; i < this.length; i++) {
+                let b = pool.view.getUint8(index * pool.stride + fieldOffset + i);
+                if (b === 0) break; // Para se encontrar um byte nulo
+                str += String.fromCharCode(b);
+            }
+            
+            return str;
         };
     }
     set(pool: BufferPool<any>, fieldOffset: number) {
         return (index: number, value: string) => {
-            const bytes = new Uint8Array(pool.arr, index * pool.stride + fieldOffset, this.length);
-            bString.textEncoder.encodeInto(value, bytes);
+            let i = 0;
+            let end = Math.min(this.length, value.length);
+            for (; i < end; i++) {
+                pool.view.setUint8(index * pool.stride + fieldOffset + i, value.charCodeAt(i));
+            }
+            if (i < this.length) {
+                pool.view.setUint8(index * pool.stride + fieldOffset + i, 0); // Preenche o próximo byte com 0 (nulo) para terminar a string
+            }
+            
         };
     }
 }
@@ -167,12 +179,12 @@ export const bType = {
     float32: () => new Float32(),
     float64: () => new Float64(),
     boolean: () => new bBoolean(),
-    array: <L extends number, T extends (StructSchema | BinaryType<any>)>(length: L, schema: T) => {
-        const build: any = {};
+    array: <T extends (StructSchema | BinaryType<any>)>(length: number, schema: T) => {
+        const build: Record<number, T> = {};
         for(let i = 0; i < length; i++) {
-            build[""+i] = schema;
+            build[i] = schema;
         }
-        return build as SizedObject<L, T>;
+        return build;
     },
     string: (length: number) => new bString(length)
 };
@@ -276,17 +288,21 @@ export class BufferPool<T extends StructSchema> {
     /**
      * Aloca um novo objeto no pool, reutilizando um espaço vazio se disponível.
      */
-    public allocNode(): number {
+    public allocNode(clear: boolean = true): number {
         if (this.lastFree !== -1) {
             // Reutiliza um espaço vazio (faz "pop" da pilha de vazios).
-            // return this.freeSlots.pop()!;
-            
+
             // Pega o índice do último espaço livre
             const freeNode = this.lastFree;
 
             // Atualiza o índice do último espaço livre para o próximo na pilha
             this.lastFree = this.view.getInt32(this.lastFree * this.stride + 0, true);
             this.length++;
+
+            // Limpa os valores do nó alocado, se necessário
+            if (clear) {
+                this.bufferView.fill(0, freeNode * this.stride, (freeNode + 1) * this.stride);
+            }
 
             return freeNode;
         } else {
@@ -327,32 +343,42 @@ export class BufferPool<T extends StructSchema> {
      */
     public clear(): void {
         // usando .length = 0 para limpar o array sem desalocar
-
+        this.bufferView.fill(0); // Limpa todos os valores para 0
         this.length = 0;
         this.lastFree = -1;
     }
 }
 
-const queueNodeSchema = {
-    value: bType.int32(),
-    next: bType.int32(),
-} as const;
-
-export class BufferPoolQueue implements Queue<number> {
-    pool: BufferPool<typeof queueNodeSchema>;
+export class BufferPoolQueue<T, SCHEMA extends (StructSchema | BinaryType<any>) = Int32> implements Queue<T> {
+    pool: BufferPool<{
+        value: SCHEMA,
+        next: Int32,
+    }>;
     
     private front: number;
     private rear: number;
 
-    constructor(capacity: number) {
-        this.pool = new BufferPool(capacity, queueNodeSchema);
+    get: (pool: typeof this.pool, index: number) => T
+    set: (pool: typeof this.pool, index: number, value: T) => void
+
+    constructor(capacity: number, schema: SCHEMA = bType.int32() as SCHEMA, 
+        get: typeof this.get,
+        set: typeof this.set
+    ) {
+        this.pool = new BufferPool(capacity, {
+            value: schema,
+            next: bType.int32(),
+        });
+        this.get = get;
+        this.set = set;
         this.front = -1; // Índice do primeiro elemento
         this.rear = -1; // Índice do último elemento
     }
     
-    addLast(valor: number): void {
-        const node = this.pool.allocNode();
-        this.pool.set.value(node, valor);
+    addLast(valor: T): void {
+        const node = this.pool.allocNode(false);
+        //this.pool.set.value(node, valor);
+        this.set(this.pool, node, valor);
         this.pool.set.next(node, -1);
         //this.pool.setValues(node, valor, -1); // O próximo do nó será -1 (nada)
 
@@ -367,10 +393,11 @@ export class BufferPoolQueue implements Queue<number> {
         }
     }
 
-    removeFirst(): number | undefined {
+    removeFirst(): T | undefined {
         if (this.front === -1) return undefined; // Fila vazia
 
-        const value = this.pool.get.value(this.front); // Obtém o valor do nó no front
+        //const value = this.pool.get.value(this.front); // Obtém o valor do nó no front
+        const value = this.get(this.pool, this.front); // Obtém o valor do nó no front
         const next =  this.pool.get.next(this.front); // Obtém o
         this.pool.freeNode(this.front);
 
@@ -382,7 +409,7 @@ export class BufferPoolQueue implements Queue<number> {
             // Move o front para o próximo nó
             this.front = next;
         }
-        return value;
+        return value as T;
     }
 
     // push(v: any): void {
@@ -400,7 +427,7 @@ export class BufferPoolQueue implements Queue<number> {
 
     //     return node as T;
     // }
-    peekFirst(): number | undefined {
+    peekFirst(): T | undefined {
         throw new Error("Method not implemented.");
     }
     isEmpty(): boolean {
@@ -419,10 +446,11 @@ export class BufferPoolQueue implements Queue<number> {
     }
 
     // for of
-    *[Symbol.iterator](): IterableIterator<number> {
+    *[Symbol.iterator](): IterableIterator<T> {
         let currentIndex = this.front;
         while (currentIndex !== -1) {
-            const node = this.pool.get.value(currentIndex);
+            //const node = this.pool.get.value(currentIndex);
+            const node = this.get(this.pool, currentIndex);
             if (node) {
                 yield node;
                 currentIndex = this.pool.get.next(currentIndex); // Move para o próximo nó

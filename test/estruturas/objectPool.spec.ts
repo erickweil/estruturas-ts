@@ -70,7 +70,14 @@ describe('VecPool', () => {
             expect(pool.get.meta.version(a)).toBe(1);
             expect(pool.get.meta.flags(a)).toBe(0b00000001);
 
-            expect(pool.get.name(a).replace(/\0/g, '')).toBe(name);
+            expect(pool.get.name(a)).toBe(name);
+
+            pool.set.name(a, `AAAAAAAAAAAAAAA`);
+            expect(pool.get.name(a)).toBe("AAAA"); // Deve truncar para 4 caracteres
+
+            // Não deve permitir sobrescrever o resto
+            expect(pool.get.meta.version(a)).toBe(1);
+            expect(pool.get.meta.flags(a)).toBe(0b00000001);
         }
 
         expect(pool.size()).toBe(5);
