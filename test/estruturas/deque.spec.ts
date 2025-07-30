@@ -5,6 +5,6 @@ import { ArrayDeque } from "../../src/estruturas/arrayDeque.js";
 
 describe("Testes em Deque", () => {
     test("Deque: Testes deque padrão", async () => {
-        testDeque(new ArrayDeque<string>());
+        testDeque(new ArrayDeque<number>());
     });
 });

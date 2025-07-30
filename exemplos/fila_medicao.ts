@@ -1,26 +1,38 @@
 import { ArrayQueue } from "../src/estruturas/arrayQueue.js";
 import { DualStackQueue } from "../src/estruturas/dualStackQueue.js";
+import { graficoTempoExecucao } from "./grafico.js";
 
-function iniciarMedicao(): bigint {
-    return process.hrtime.bigint();
-}
+graficoTempoExecucao(50_000, 30, 2, [
+    {
+        name: "Array",
+        setup: async (N: number, etapas: number) => {
+            let arr = [];
 
-function printMedicao(inicio: bigint, mensagem: string) {
-    let fim = process.hrtime.bigint();
-    let ms = (fim - inicio) / BigInt(1000000);
-    console.log(`${mensagem}${ms}`);
-}
+            return (N: number, etapa: number) => {
+                for (let i = 0; i < N * etapa; i++) {
+                    arr.push(i);
+                }
+                for (let i = 0; i < N * etapa; i++) {
+                    // arr.shift(); // sim isso é lento, não é esse o objetivo do teste
+                    arr.pop();
+                }
+            };
+        }
+    },
+    {
+        name: "ArrayQueue",
+        setup: async (N: number, etapas: number) => {
+            const queue = new ArrayQueue<number>();
 
-const N = 50_000;
-for(let medicoes = 1; medicoes < 100; medicoes++) {
-    let fila = new ArrayQueue<number>();
-    for(let iter = 0; iter < N*2*medicoes; iter++) {
-        fila.addLast(Math.random());
-    }
-
-    let inicio = iniciarMedicao();
-    fila.resize();
-    //printMedicao(inicio,`${medicoes} Nº elementos: ${fila.size()} Tempo:`);
-    printMedicao(inicio,"");
-}
+            return (N: number, etapa: number) => {
+                for(let i = 0; i < N * etapa; i++) {
+                    queue.addLast(i);
+                }
+                for(let i = 0; i < N * etapa; i++) {
+                    queue.removeFirst();
+                }
+            };
+        }
+    },
+]);
 

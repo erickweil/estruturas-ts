@@ -1,187 +1,104 @@
-import * as asciichart from 'asciichart';
-import { ArrayDeque } from "../src/estruturas/arrayDeque.js";
-import { ArrayQueue } from "../src/estruturas/arrayQueue.js";
-import { ArrayStack } from "../src/estruturas/arrayStack.js";
-import { DualStackQueue } from "../src/estruturas/dualStackQueue.js";
-import { LinkedList } from "../src/estruturas/linkedList.js";
-import { LinkedStack } from "../src/estruturas/linkedStack.js";
-import { ObjectPool, PoolNode } from "../src/estruturas/objectPool2.js";
-//import { PoolList } from "../src/estruturas/poolList.js";
-import { Deque } from "../src/interfaces/deque.js";
-import { List } from "../src/interfaces/list.js";
-import { Queue } from "../src/interfaces/queue.js";
-import { Stack } from "../src/interfaces/stack.js";
-import { NumberPoolQueue } from '../src/estruturas/numberPool.js';
-import { bType, BufferPoolQueue, StructSchema } from '../src/estruturas/bufferPool.js';
-const N = 100_000;
+import { BufferPool } from "../src/estruturas/bufferPool.js";
+import { createStructView, StructType } from "../src/utils/structSchema.js";
+import { graficoTempoExecucao } from "./grafico.js";
 
+let counter = 1;
 function createPayload(i: number) {
-    return i;
-
-    /*return {
-        value: Math.random() * 100,
-        arr: [Math.random() * 100, Math.random() * 100, Math.random() * 100],
-        name: `N ${i}`,
-    };*/
+    return (counter++) + i;
+    //return Math.random() + i + 1;
 }
 type Payload = ReturnType<typeof createPayload>;
 
-function criarListas(capacity: number): Queue<Payload>[] {
-    const poolSchema = 
-    /*{
-        arr: bType.array(3, bType.int32()),
-        value: bType.float32(),
-        name: bType.string(10),
-     } satisfies StructSchema;
-    */
+await graficoTempoExecucao(100_000, 30, 2, [
     {
-        n: bType.int32(),
-    } satisfies StructSchema;
+        name: "Array",
+        setup: async (N: number, etapas: number) => {
+            const arr: number[] = [];
 
-    return [
-        new ArrayQueue<Payload>(capacity),
-        //new NumberPoolQueue(capacity),
-        new BufferPoolQueue<Payload, typeof poolSchema>(capacity, poolSchema, 
-            (pool, index) => {
-                return pool.get.value.n(index);
-                /*return {
-                    arr: [
-                        pool.get.value.arr[0](index),
-                        pool.get.value.arr[1](index),
-                        pool.get.value.arr[2](index)
-                    ],
-                    value: pool.get.value.value(index),
-                    name: pool.get.value.name(index),
-                };*/
-            },
-            (pool, index, value) => {
-                pool.set.value.n(index, value);
-                /*pool.set.value.arr[0](index, value.arr[0]);
-                pool.set.value.arr[1](index, value.arr[1]);
-                pool.set.value.arr[2](index, value.arr[2]);
-                pool.set.value.value(index, value.value);
-                pool.set.value.name(index, value.name);*/
-            }
-        ),
+            return (N: number, etapa: number) => {
+                for (let i = N * etapa; i < N * (etapa+1); i++) {
+                    arr[i * 2 + 0] = createPayload(i);
+                    arr[i * 2 + 1] = createPayload(i);
 
-        new LinkedList<Payload>(),
-    ]
-}
+                    if (arr[i * 2 + 0] <= 0 || arr[i * 2 + 1] <= 0 ) throw new Error("Array não preenchido corretamente");
+                }
+            };
+        },
+    },
+    {
+        name: "PoolBuffer",
+        setup: async (N: number, etapas: number) => {
+            const pool = new BufferPool(8196, {
+                a: StructType.float32(),
+                b: StructType.float32()
+            });
 
-function iniciarMedicao(): bigint {
-    return process.hrtime.bigint();
-}
+            return (N: number, etapa: number) => {
+                for (let i = N * etapa; i < N * (etapa+1); i++) {
+                    const node = pool.allocNode();
+                    pool.schema.a.set(node, createPayload(i));
+                    pool.schema.b.set(node, createPayload(i));
 
-function printMedicao(inicio: bigint, mensagem: string) {
-    let fim = process.hrtime.bigint();
-    let ms = (fim - inicio) / BigInt(1000000);
-    console.log(`${mensagem}${ms}`);
-}
+                    const a = pool.schema.a.get(node);
+                    const b = pool.schema.b.get(node);
+                    if (a <= 0 || b <= 0) throw new Error("PoolBuffer não preenchido corretamente"+a+", "+b);
+                }
+            };
+        },
+    },
+    {
+        name: "PoolBuffer + StructView",
+        setup: async (N: number, etapas: number) => {
+            // INVESTIGAR: porquê com apenas 1 repetição, StructView é ok, mas com 2 ou mais repetições fica 10x mais lento?
+            const pool = new BufferPool(8196, {
+                a: StructType.float32(),
+                b: StructType.float32()
+            });
+            const view = createStructView(pool.schema);
 
-function medirAdd(list: Queue<Payload>, medicao: number) {
-    list.clear();
-    const WARMUP_SIZE = N * medicao;
-    
-    // 1. Aquecimento: Preenche a pilha com um número inicial de objetos
-    for (let i = 0; i < WARMUP_SIZE; i++) {
-        list.addLast(createPayload(i+1));
-    }
+            return (N: number, etapa: number) => {
+                for (let i = N * etapa; i < N * (etapa+1); i++) {
+                    const node = pool.allocNode();
+                    view.setOffset(node);
+                    view.a = createPayload(i);
+                    view.b = createPayload(i);
 
-    // // 2. Medição: Adiciona e remove elementos repetidamente, sem alterar o tamanho da fila
-    for(let iter = 0; iter < WARMUP_SIZE; iter++) {
-       list.addLast(list.removeFirst()!);
-    }
+                    if (view.a <= 0 || view.b <= 0) throw new Error("PoolBuffer + StructView não preenchido corretamente");
+                }
+            };
+        },
+    },
+    {
+        name: "Float32Array",
+        setup: async (N: number, etapas: number) => {
+            const arr = new Float32Array(N * etapas * 4 * 2); // 4 bytes por int32
 
-    // 3. Atravessa a lista para garantir que os objetos estão acessíveis
-    /*//for (let iter = 0; iter < medicao; iter++) {
-        for(let elem of (list as any)) {
-            if(!elem) {
-                throw new Error("Elemento inválido na lista");
-            }
+            return (N: number, etapa: number) => {
+                for (let i = N * etapa; i < N * (etapa+1); i++) {
+                    arr[i * 2 + 0] = createPayload(i);
+                    arr[i * 2 + 1] = createPayload(i);
+
+                    if (arr[i * 2 + 0] <= 0 || arr[i * 2 + 1] <= 0 ) throw new Error("Float32Array não preenchido corretamente");
+                }
+            };
         }
-    //}*/
-}
+    },
+    {
+        name: "DataView",
+        setup: async (N: number, etapas: number) => {
+            const arr = new ArrayBuffer(N * etapas * 4 * 2); // 4 bytes por int32
+            const view = new DataView(arr);
 
-/*
-for(let medicoes = 1; medicoes < 20; medicoes++) {
-    let lists = criarListas();
-    console.log();
-    console.log("Medição Nº",medicoes);
-    for(let [n, lista] of lists.entries()) {
-        let inicio = iniciarMedicao();
-        medirAdd(lista as any, medicoes);
-        //printMedicao(inicio,`${medicoes} Nº elementos: ${fila.size()} Tempo:`);
-        printMedicao(inicio,`Lista Nº ${n} (${(lista as Object).constructor.name}), Tempo:`);
-    }
-}*/
+            return (N: number, etapa: number) => {
+                for (let i = N * etapa; i < N * (etapa+1); i++) {
+                    view.setFloat32(i * 4 * 2 + 0, createPayload(i) * 1.0, true);
+                    view.setFloat32(i * 4 * 2 + 4, createPayload(i) * 1.0, true);
 
-async function runBenchmarkAndChart() {
-    console.log("Iniciando benchmark...");
-
-    // 1. Estrutura para armazenar os resultados (tempo em ms) para cada classe
-    const results = new Map<string, number[]>();
-    const queueImplementations = criarListas(N);
-
-    // Inicializa o Map com o nome de cada implementação de fila
-    for (const list of queueImplementations) {
-        results.set(list.constructor.name, []);
-    }
-
-    const MAX_MEDICOES = 20;
-
-    // 2. Loop de benchmark para coletar os dados (sem imprimir na tela)
-    for (let medicoes = 1; medicoes < MAX_MEDICOES; medicoes++) {
-        // Exibe o progresso para o usuário não achar que o programa travou
-        console.log(`Executando medição Nº ${medicoes}/${MAX_MEDICOES - 1}`);
-
-        const lists = criarListas(N * medicoes); // Recria as listas para um teste justo
-        for (const lista of lists) {
-            const className = lista.constructor.name;
-
-            const inicio = iniciarMedicao();
-            medirAdd(lista as any, medicoes);
-            medirAdd(lista as any, medicoes);
-            const fim = process.hrtime.bigint();
-
-            // Converte para número e armazena o resultado
-            const ms = Number((fim - inicio) / BigInt(1000000));
-            results.get(className)?.push(ms);
-
-            // Exibe o tempo de execução para cada implementação
-            console.log(`Lista: ${className}, Tempo: ${ms} ms`);
+                    const a = view.getFloat32(i * 4 * 2 + 0, true);
+                    const b = view.getFloat32(i * 4 * 2 + 4, true);
+                    if (a <= 0 || b <= 0 ) throw new Error("DataView não preenchido corretamente "+a+", "+b);
+                }
+            };
         }
     }
-
-    console.log("\n\nBenchmark concluído. Gerando gráfico...");
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Pequena pausa para o usuário ler
-
-    // 3. Prepara os dados e plota o gráfico
-    const series = Array.from(results.values());
-    const classNames = Array.from(results.keys());
-
-    const config = {
-        height: 30, // Altura do gráfico em linhas
-        colors: [   // Define cores para cada linha do gráfico
-            asciichart.green, // ArrayQueue
-            asciichart.yellow, // BufferPoolQueue
-            //asciichart.blue,  // PoolQueue
-            asciichart.red,   // LinkedList
-        ]
-    };
-
-    //console.clear(); // Limpa o terminal para exibir o gráfico
-    console.log("Resultados do Benchmark - Tempo de Execução (ms)\n");
-
-    // 4. Imprime uma legenda clara para o gráfico
-    console.log("\nLegenda:");
-    console.log("ArrayQueue: Verde");
-    console.log("BufferPoolQueue: Amarelo");
-    //console.log("PoolQueue: Azul");
-    console.log("LinkedList: Vermelho");
-
-    console.log("\nEixo X: Nº da Medição (Carga de Trabalho Crescente)");
-    console.log("Eixo Y: Tempo de Execução (ms)");
-
-    console.log(asciichart.plot(series, config));
-}
-await runBenchmarkAndChart();
+]);
