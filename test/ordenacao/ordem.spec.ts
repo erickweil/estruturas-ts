@@ -1,5 +1,6 @@
 import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
 import { bubbleSort } from "../../src/ordenacao/bubbleSort.js";
+import { selectionSort } from "../../src/ordenacao/selectionSort.js";
 
 describe("Testes em Ordenação", () => {
 
@@ -30,6 +31,23 @@ describe("Testes em Ordenação", () => {
         ]
         for(let lista of listas) {
             lista = bubbleSort(lista);
+            verificaOrdem(lista);
+        }
+    });
+
+
+
+    test("SelectionSort", () => {
+        let listas = [
+            [9,8,7,6,5,4,3,2,1,0],
+            [0,1,2,3,4,5,6,7,8,9],
+            [7,4,8,2,8,0,1,7,8,9],
+            gerarLista(10),
+            gerarLista(100),
+            gerarLista(1000)
+        ]
+        for(let lista of listas) {
+            lista = selectionSort(lista);
             verificaOrdem(lista);
         }
     });

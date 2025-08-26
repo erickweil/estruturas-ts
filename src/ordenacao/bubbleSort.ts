@@ -14,9 +14,10 @@ export const bubbleSort = (arr: number[]) => {
                 trocas++;
             }
         }
+        // Aconteceu alguma troca?
         if(trocas == 0) {
-            break;
+            // Se não houve nenhuma, então está em ordem!
+            return arr;
         }
-    }   
-    return arr;
+    }    
 };
