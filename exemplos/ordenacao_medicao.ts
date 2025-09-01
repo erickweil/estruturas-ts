@@ -1,7 +1,5 @@
-import { BufferPool } from "../src/estruturas/bufferPool.js";
 import { bubbleSort } from "../src/ordenacao/bubbleSort.js";
 import { selectionSort } from "../src/ordenacao/selectionSort.js";
-import { createStructView, StructType } from "../src/utils/structSchema.js";
 import { graficoTempoExecucao } from "./grafico.js";
 
 function gerarLista(tamanho: number) {
@@ -25,14 +23,14 @@ function misturar(arr: number[]) {
   return arr;
 }
 
-await graficoTempoExecucao(2_000, 30, 2, [
+await graficoTempoExecucao(1_000, 30, 2, [
     {
         name: "Array.sort",
         setup: async (N: number, etapas: number) => {
             let listas = gerarListas(N, etapas);
             return (N: number, etapa: number) => {
                 let lista = listas[etapa];
-                lista.sort();
+                lista.sort((a, b) => a - b);
             };
         },
     },
@@ -42,7 +40,7 @@ await graficoTempoExecucao(2_000, 30, 2, [
             let listas = gerarListas(N, etapas);
             return (N: number, etapa: number) => {
                 let lista = listas[etapa];
-                bubbleSort(lista);
+                bubbleSort(lista, (a, b) => a - b);
             };
         },
     },
@@ -52,7 +50,7 @@ await graficoTempoExecucao(2_000, 30, 2, [
             let listas = gerarListas(N, etapas);
             return (N: number, etapa: number) => {
                 let lista = listas[etapa];
-                selectionSort(lista);
+                selectionSort(lista, (a, b) => a - b);
             };
         },
     },
