@@ -1,4 +1,5 @@
 import { bubbleSort } from "../src/ordenacao/bubbleSort.js";
+import { insertionSort } from "../src/ordenacao/insertionSort.js";
 import { selectionSort } from "../src/ordenacao/selectionSort.js";
 import { graficoTempoExecucao } from "./grafico.js";
 
@@ -23,7 +24,7 @@ function misturar(arr: number[]) {
   return arr;
 }
 
-await graficoTempoExecucao(1_000, 30, 2, [
+await graficoTempoExecucao(100, 30, 10, [
     {
         name: "Array.sort",
         setup: async (N: number, etapas: number) => {
@@ -34,7 +35,7 @@ await graficoTempoExecucao(1_000, 30, 2, [
             };
         },
     },
-    {
+    /*{
         name: "Bubble sort",
         setup: async (N: number, etapas: number) => {
             let listas = gerarListas(N, etapas);
@@ -43,7 +44,7 @@ await graficoTempoExecucao(1_000, 30, 2, [
                 bubbleSort(lista, (a, b) => a - b);
             };
         },
-    },
+    },*/
     {
         name: "Selection sort",
         setup: async (N: number, etapas: number) => {
@@ -51,6 +52,16 @@ await graficoTempoExecucao(1_000, 30, 2, [
             return (N: number, etapa: number) => {
                 let lista = listas[etapa];
                 selectionSort(lista, (a, b) => a - b);
+            };
+        },
+    },
+    {
+        name: "Insertion sort",
+        setup: async (N: number, etapas: number) => {
+            let listas = gerarListas(N, etapas);
+            return (N: number, etapa: number) => {
+                let lista = listas[etapa];
+                insertionSort(lista, (a, b) => a - b);
             };
         },
     },

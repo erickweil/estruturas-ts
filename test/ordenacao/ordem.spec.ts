@@ -1,6 +1,7 @@
 import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
 import { bubbleSort } from "../../src/ordenacao/bubbleSort.js";
 import { selectionSort } from "../../src/ordenacao/selectionSort.js";
+import { insertionSort } from "../../src/ordenacao/insertionSort.js";
 
 describe("Testes em Ordenação", () => {
 
@@ -55,5 +56,9 @@ describe("Testes em Ordenação", () => {
 
     test("SelectionSort", () => {
         testarAlgoritmoOrdenacao(selectionSort);
+    });
+
+    test("InsertionSort", () => {
+        testarAlgoritmoOrdenacao(insertionSort);
     });
 });
