@@ -1,7 +1,7 @@
 {
   "name": "estruturas-ts",
   "description": "Estruturas de dados (Stack, Queue, LinkedList) implementadas em Typescript",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Erick L. Weil",
   "license": "MIT",
   "keywords": [
