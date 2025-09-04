@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { Queue } from "../../src/interfaces/queue.js";
 
 export function testQueue(fila: Queue<string>) {

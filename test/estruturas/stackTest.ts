@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { Stack } from "../../src/interfaces/stack.js";
 
 export function testStack(pilha: Stack<string>) {

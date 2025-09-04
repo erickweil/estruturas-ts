@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { Deque } from "../../src/interfaces/deque.js";
 
 export function testDeque(deque: Deque<number>) {

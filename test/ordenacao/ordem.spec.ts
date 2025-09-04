@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { bubbleSort } from "../../src/algoritmos/ordenacao/bubbleSort.js";
 import { selectionSort } from "../../src/algoritmos/ordenacao/selectionSort.js";
 import { binaryInsertionSort, insertionSort } from "../../src/algoritmos/ordenacao/insertionSort.js";

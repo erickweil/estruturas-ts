@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { BufferPool } from "../../src/estruturas/bufferPool.js";
 import { StructType, StructSchema, createStructView } from "../../src/utils/structSchema.js";
 

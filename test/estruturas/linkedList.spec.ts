@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { List } from "../../src/interfaces/list.js";
 import { testQueue } from "./filaTest.js";
 import { testDeque } from "./dequeTest.js";

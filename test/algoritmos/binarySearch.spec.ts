@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { binarySearch, binarySearchLeftMost } from "../../src/algoritmos/busca/binarySearch.js";
 
 describe("Testes em Busca Binária", () => {

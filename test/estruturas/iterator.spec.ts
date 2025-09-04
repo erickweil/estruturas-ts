@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { ArrayStack } from "../../src/estruturas/arrayStack.js";
 import { LinkedStack } from "../../src/estruturas/linkedStack.js";
 import { ArrayQueue } from "../../src/estruturas/arrayQueue.js";

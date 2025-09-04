@@ -1,4 +1,4 @@
-import { jest, describe, expect, test, beforeEach } from "@jest/globals";
+import { beforeEach, describe, expect, test } from "vitest";
 import { ConsumerQueue } from "../../src/utils/consumerQueue.js";
 
 describe("ConsumerArrayQueue", () => {
