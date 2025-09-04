@@ -1,7 +1,7 @@
 import { jest, describe, expect, test, afterAll, beforeAll } from "@jest/globals";
-import { bubbleSort } from "../../src/ordenacao/bubbleSort.js";
-import { selectionSort } from "../../src/ordenacao/selectionSort.js";
-import { insertionSort } from "../../src/ordenacao/insertionSort.js";
+import { bubbleSort } from "../../src/algoritmos/ordenacao/bubbleSort.js";
+import { selectionSort } from "../../src/algoritmos/ordenacao/selectionSort.js";
+import { binaryInsertionSort, insertionSort } from "../../src/algoritmos/ordenacao/insertionSort.js";
 
 describe("Testes em Ordenação", () => {
 
@@ -60,5 +60,9 @@ describe("Testes em Ordenação", () => {
 
     test("InsertionSort", () => {
         testarAlgoritmoOrdenacao(insertionSort);
+    });
+
+    test("BinaryInsertionSort", () => {
+        testarAlgoritmoOrdenacao(binaryInsertionSort);
     });
 });

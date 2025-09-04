@@ -1,4 +1,4 @@
-import { lexicograficallyCompare } from "../utils/lexicograficallyCompare.js";
+import { lexicograficallyCompare } from "../../utils/lexicograficallyCompare.js";
 
 export const bubbleSort = <T>(arr: T[], compFn: (a: T,b: T) => number = lexicograficallyCompare) => {
     for(let k = 0; k < arr.length; k++) {

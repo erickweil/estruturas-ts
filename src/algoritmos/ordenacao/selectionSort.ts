@@ -1,4 +1,4 @@
-import { lexicograficallyCompare } from "../utils/lexicograficallyCompare.js";
+import { lexicograficallyCompare } from "../../utils/lexicograficallyCompare.js";
 
 /**
    Conforme Atravessar cada elemento:

@@ -1,6 +1,6 @@
-import { bubbleSort } from "../src/ordenacao/bubbleSort.js";
-import { insertionSort } from "../src/ordenacao/insertionSort.js";
-import { selectionSort } from "../src/ordenacao/selectionSort.js";
+import { bubbleSort } from "../src/algoritmos/ordenacao/bubbleSort.js";
+import { binaryInsertionSort, insertionSort } from "../src/algoritmos/ordenacao/insertionSort.js";
+import { selectionSort } from "../src/algoritmos/ordenacao/selectionSort.js";
 import { graficoTempoExecucao } from "./grafico.js";
 
 function gerarLista(tamanho: number) {
@@ -24,7 +24,7 @@ function misturar(arr: number[]) {
   return arr;
 }
 
-await graficoTempoExecucao(100, 30, 10, [
+await graficoTempoExecucao(1000, 30, 1, [
     {
         name: "Array.sort",
         setup: async (N: number, etapas: number) => {
@@ -62,6 +62,16 @@ await graficoTempoExecucao(100, 30, 10, [
             return (N: number, etapa: number) => {
                 let lista = listas[etapa];
                 insertionSort(lista, (a, b) => a - b);
+            };
+        },
+    },
+    {
+        name: "Binary insertion sort",
+        setup: async (N: number, etapas: number) => {
+            let listas = gerarListas(N, etapas);
+            return (N: number, etapa: number) => {
+                let lista = listas[etapa];
+                binaryInsertionSort(lista, (a, b) => a - b);
             };
         },
     },
