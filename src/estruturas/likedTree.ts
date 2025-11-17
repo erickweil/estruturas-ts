@@ -18,6 +18,7 @@ ArvoreNó -> Inserir
 
 import { Tree } from "../interfaces/tree.js";
 import { lexicograficallyCompare } from "../utils/lexicograficallyCompare.js";
+import { DualStackQueue } from "./dualStackQueue.js";
 
 
 class ArvoreNo<T> {
@@ -85,6 +86,32 @@ export class LinkedTree<T> implements Tree<T> {
         }
         this.raiz.travessia(callback);
     }
+
+
+
+    traverseBFS(callback: (valor: T) => void) {
+        if(!this.raiz) return;
+        const proximos = new DualStackQueue<ArvoreNo<T>>();
+        proximos.addLast(this.raiz);
+
+        while(true) {
+            const no = proximos.removeFirst();
+            if(!no) break;
+            
+            callback(no.valor);
+            if(no.esquerda) {
+                proximos.addLast(no.esquerda);
+            }
+            if(no.direita) {
+                proximos.addLast(no.direita);
+            }
+        }
+    }
+
+
+
+
+
 
     isEmpty(): boolean {
         return this.raiz ? false : true;

@@ -11,6 +11,14 @@ describe("Testes em Árvore", () => {
         t.traverseDFS((v) => quantos++);
         expect(quantos).toBe(0);
 
+        t.traverseBFS((v) => quantos++);
+        expect(quantos).toBe(0);
+
+        /*
+                    C
+                B       D
+            A               E
+        */
         // adicionar
         t.add("C");
         t.add("B");
@@ -27,24 +35,43 @@ describe("Testes em Árvore", () => {
         t.traverseDFS((v) => ordem.push(v));
         expect(ordem.join()).toBe("A,B,C,D,E");
 
+        ordem = [];
+        t.traverseBFS((v) => ordem.push(v));
+        expect(ordem.join()).toBe("C,B,D,A,E");
+
         t.clear();
         expect(t.isEmpty()).toBe(true);
     });
 
     test("Árvore: Teste inserção em massa", async () => {
-        let t = new LinkedTree<number>((a,b) => a - b);
+        type TestNo = { valor: number, visitado: number };
+        let t = new LinkedTree<TestNo>((a,b) => a.valor - b.valor);
 
         for(let i =0; i < 1000; i++) {
-            t.add(Math.random());
+            t.add({ valor: Math.random(), visitado: 0 });
         }
 
         // Garante que atravessou em ordem.
         let ultimo: number | null = null;
-        t.traverse((v) => {
+        let quantos = 0;
+        t.traverseDFS((v) => {
+            expect(v.visitado).toBe(0);
+            v.visitado++;
+            quantos++;
             if(ultimo !== null) {
-                expect(v >= ultimo).toBe(true);
+                expect(v.valor >= ultimo).toBe(true);
             }
-            ultimo = v;
+            ultimo = v.valor;
         });
+        expect(quantos).toBe(1000);
+
+        t.traverseBFS((v) => {
+            expect(v.visitado).toBe(1);
+            v.visitado++;
+            quantos++;
+        });
+        expect(quantos).toBe(2000);
+
+
     });
 });
