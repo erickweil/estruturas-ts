@@ -13,11 +13,13 @@ export function testStack(pilha: Stack<string>) {
 
         expect(pilha.size()).toBe(3);
         expect(pilha.isEmpty()).toBe(false);
+        expect(pilha.peekLast()).toBe("C");
 
         expect(pilha.pop()).toBe("C");
         expect(pilha.pop()).toBe("B");
         expect(pilha.pop()).toBe("A");
         expect(pilha.pop()).toBe(undefined);
+        expect(pilha.peekLast()).toBe(undefined);
 
         expect(pilha.size()).toBe(0);
         expect(pilha.isEmpty()).toBe(true);
@@ -33,6 +35,8 @@ export function testStack(pilha: Stack<string>) {
 
         expect(pilha.size()).toBe(0);
         expect(pilha.isEmpty()).toBe(true);
+        expect(pilha.pop()).toBe(undefined);
+        expect(pilha.peekLast()).toBe(undefined);
 
         pilha.push("A");
 
@@ -46,8 +50,11 @@ export function testStack(pilha: Stack<string>) {
             expect(pilha.pop()).toBe("C");
             expect(pilha.pop()).toBe("B");
             expect(pilha.size()).toBe(1);
+            expect(pilha.isEmpty()).toBe(false);
+            expect(pilha.peekLast()).toBe("A");
         }
 
+        expect(pilha.peekLast()).toBe("A");
         expect(pilha.pop()).toBe("A");
 
         expect(pilha.size()).toBe(0);

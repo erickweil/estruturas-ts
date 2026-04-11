@@ -1,4 +1,4 @@
-import { Elem, LinkedStack } from "../src/estruturas/linkedStack.js";
+import { LinkedStack } from "../src/estruturas/linkedStack.js";
 
 let lista = new LinkedStack<string>();
 

@@ -33,4 +33,30 @@ describe("Testes em LinkedStack", () => {
         popAll(clone1,["B'","A'","C","B","A"]);
         popAll(clone2,["B''","A''","E","D","C","B","A"]);
     });
+
+    test("Testes do protocolo iterável", () => {
+        const lista = new LinkedStack<string>();
+        lista.push("A");
+        lista.push("B");
+        lista.push("C");
+
+        let valores: string[] = [];
+        for(let valor of lista) {
+            valores.push(valor);
+        }
+        expect(valores).toStrictEqual(["C","B","A"]);
+
+        // Modificando a pilha durante a iteração
+        valores = [];
+        for(let valor of lista) {
+            valores.push(valor);
+            if(valor === "B") {
+                lista.pop(); // Remove "C"
+            }
+            if(valor === "A") {
+                lista.push("D"); // Adiciona "D" no topo
+            }
+        }
+        expect(valores).toStrictEqual(["C","B","A"]);
+    });
 });

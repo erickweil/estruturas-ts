@@ -7,13 +7,16 @@ export { Deque } from "./src/interfaces/deque.js";
 export { List } from "./src/interfaces/list.js";
 export { Queue } from "./src/interfaces/queue.js";
 export { Stack } from "./src/interfaces/stack.js";
+export { Tree } from "./src/interfaces/tree.js";
 
 // estruturas
 export { ArrayDeque } from "./src/estruturas/arrayDeque.js";
 export { ArrayQueue } from "./src/estruturas/arrayQueue.js";
 export { ArrayStack } from "./src/estruturas/arrayStack.js";
+export { BitFlag32, BitFlagArray, createBitFlag } from "./src/estruturas/bitFlag.js";
 export { BufferPool } from "./src/estruturas/bufferPool.js";
 export { DualStackQueue } from "./src/estruturas/dualStackQueue.js";
+// export { LinkedTree } from "./src/estruturas/likedTree.js"; -- Não está pronto
 export { LinkedList } from "./src/estruturas/linkedList.js";
 export { LinkedStack } from "./src/estruturas/linkedStack.js";
 export { PoolList } from "./src/estruturas/poolList.js";

@@ -2,7 +2,7 @@ import { ArrayQueue } from "../src/estruturas/arrayQueue.js";
 import { DualStackQueue } from "../src/estruturas/dualStackQueue.js";
 import { graficoTempoExecucao } from "./grafico.js";
 
-graficoTempoExecucao(50_000, 30, 2, [
+graficoTempoExecucao(1_000, 80, 2, [
     {
         name: "Array",
         setup: async (N: number, etapas: number) => {
@@ -13,8 +13,8 @@ graficoTempoExecucao(50_000, 30, 2, [
                     arr.push(i);
                 }
                 for (let i = 0; i < N * etapa; i++) {
-                    // arr.shift(); // sim isso é lento, não é esse o objetivo do teste
-                    arr.pop();
+                    arr.shift(); // sim isso é lento, não é esse o objetivo do teste
+                    //arr.pop();
                 }
             };
         }

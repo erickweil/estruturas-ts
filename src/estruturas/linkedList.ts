@@ -1,7 +1,7 @@
 import { List } from "../interfaces/list.js";
 
 class No<T> {
-    valor: T;
+    readonly valor: T;
     proximo: No<T> | null;
     anterior: No<T> | null;
 

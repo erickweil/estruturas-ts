@@ -13,6 +13,9 @@ export class ArrayStack<T> implements Stack<T> {
     pop(): T | undefined {
         return this.arr.pop();
     }
+    peekLast(): T | undefined {
+        return this.arr.length > 0 ? this.arr[this.arr.length - 1] : undefined;
+    }
     isEmpty(): boolean {
         return this.arr.length <= 0;
     }
