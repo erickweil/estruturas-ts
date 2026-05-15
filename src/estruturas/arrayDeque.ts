@@ -3,8 +3,8 @@ import { Stack } from "../interfaces/stack.js";
 import { ArrayQueue } from "./arrayQueue.js";
 
 export class ArrayDeque<T> extends ArrayQueue<T> implements Deque<T>, Stack<T> {
-    constructor(capacidade?: number) {
-        super(capacidade);
+    constructor(capacidade?: number, newFn?: (length: number) => (T | undefined)[]) {
+        super(capacidade, newFn);
     }
 
     protected decrementar(cont: number) {

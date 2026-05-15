@@ -7,11 +7,14 @@ export class ArrayQueue<T> implements Queue<T> {
     protected fim: number;
     protected arr: (T | undefined)[];
 
-    constructor(capacidade: number = DEFAULT_CAPACITY) {
+    constructor(
+        capacidade: number = DEFAULT_CAPACITY, 
+        newFn: (length: number) => (T | undefined)[] = (length: number) => new Array(length).fill(undefined)
+    ) {
         this.inicio = 0;
         this.fim = 0;
         // Inicializa com undefined para evitar array com buracos
-        this.arr = new Array(capacidade+1).fill(undefined);
+        this.arr = newFn(capacidade + 1);
     }
 
     protected incrementar(cont: number) {

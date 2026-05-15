@@ -4,6 +4,7 @@ import { LinkedList } from "../src/estruturas/linkedList.js";
 import { Queue } from "../src/interfaces/queue.js";
 import { graficoTempoExecucao } from './grafico.js';
 import { PoolList } from '../src/estruturas/poolList.js';
+import { ArrayBufferDeque } from "../src/estruturas/arrayBufferDeque.js";
 
 function createPayload(i: number) {
     return i;
@@ -38,11 +39,21 @@ function medirAdd(list: Queue<Payload>, N: number, etapa: number) {
     }*/
 }
 
-await graficoTempoExecucao(50_000, 30, 2, [
+await graficoTempoExecucao(20_000, 30, 3, [
+    {
+        name: "ArrayBufferDeque",
+        setup: async (N: number, etapas: number) => {
+            const list = new ArrayBufferDeque(15, (length) => new Int32Array(length));
+
+            return (N: number, etapa: number) => {
+                medirAdd(list, N, etapa);
+            };
+        },
+    },
     {
         name: "ArrayDeque",
         setup: async (N: number, etapas: number) => {
-            const list = new ArrayDeque<Payload>(N * (etapas + 1));
+            const list = new ArrayDeque<Payload>(15);
 
             return (N: number, etapa: number) => {
                 medirAdd(list, N, etapa);
@@ -86,7 +97,7 @@ await graficoTempoExecucao(50_000, 30, 2, [
             };
         },
     },
-    {
+    /*{
         name: "LinkedList",
         setup: async (N: number, etapas: number) => {
             console.log("Criando LinkedList...");
@@ -96,5 +107,5 @@ await graficoTempoExecucao(50_000, 30, 2, [
                 medirAdd(list, N, etapa);
             };
         },
-    },
+    },*/
 ]);
