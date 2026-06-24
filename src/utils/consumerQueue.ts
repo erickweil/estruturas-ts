@@ -1,75 +1,74 @@
-import { ArrayQueue } from "../estruturas/arrayQueue.js";
 import { DualStackQueue } from "../estruturas/dualStackQueue.js";
 import { Queue } from "../interfaces/queue.js";
 
-export class ConsumerQueue<T> {
+
+export class ConsumerQueue<T> implements AsyncIterable<T> {
     private resolveNext: (() => void) | undefined;
-    private queue: Queue<T | null>;
-    public isClosed: boolean;
+    private readonly queue: Queue<T | null>;
+    private closed: boolean;
 
     constructor() {
-        this.resolveNext = undefined;
         this.queue = new DualStackQueue<T | null>();
-        this.isClosed = false;
+        this.closed = false;
     }
 
-    /**
-     * Esta função serve para consumir as linhas
-     * O funcionamento é o seguinte:
-     * - Se tiver linha na fila, retorna ela um Promise já resolvida com a linha imediatamente
-     * - Se não tiver linha na fila, vai ficar 'esperando' o evento de uma nova linha, e então resolve a Promise quando tiver linha pronta
-     */
-    next(): Promise<T | null> {
-        if(!this.queue.isEmpty()) {
-            // Se tiver linha na fila, retorna ela imediatamente
+   
+    public next(): Promise<T | null> {
+        if (!this.queue.isEmpty()) {
             return Promise.resolve(this.queue.removeFirst()!);
-        } else {
-            // Se não tiver linha na fila, retorna uma Promise que só vai resolver quando tiver linha pronta para ser lida
-            return new Promise((resolve) => {
-                this.resolveNext = () => {
-                    this.resolveNext = undefined;
-                    resolve(this.queue.removeFirst()!);
-                };
-            });
         }
+
+        return new Promise((resolve) => {
+            this.resolveNext = () => {
+                this.resolveNext = undefined;
+                resolve(this.queue.removeFirst()!);
+            };
+        });
     }
 
-    push(...values: T[]) {
-        if(this.isClosed) {
-            throw new Error("Consumer was already closed");
+   
+    public push(...values: T[]): void {
+        if (this.closed) {
+            throw new Error("Cannot push to a closed ConsumerQueue");
         }
 
-        for(let v of values) {
-            this.queue.addLast(v);
-        }
+       
+        values.forEach(value => this.queue.addLast(value));
 
-        if(this.resolveNext) {
+    
+        if (this.resolveNext) {
             this.resolveNext();
         }
     }
 
-    close() {
-        // Para indicar o fim da fila, adiciona um elemento nulo
+   
+    public close(): void {
         this.queue.addLast(null);
 
-        if(this.resolveNext) {
+        if (this.resolveNext) {
             this.resolveNext();
         }
 
-        this.isClosed = true;
+        this.closed = true;
     }
 
-    // Mudar para async iterator?
-    async foreach(callback: (elem: T) => any) {
-        while(true) {
-            let element = await this.next();
+    
+    public get isClosed(): boolean {
+        return this.closed;
+    }
 
-            // Se acabou a fila e estiver fechado, para o loop
-            if(element === null) {
-                break;
+    
+    public [Symbol.asyncIterator](): AsyncIterator<T> {
+        return {
+            next: async (): Promise<IteratorResult<T>> => {
+                const element = await this.next();
+                
+                if (element === null) {
+                    return { done: true, value: undefined };
+                }
+
+                return { done: false, value: element };
             }
-
-            await callback(element);
-        }
+        };
     }
 }
