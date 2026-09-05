@@ -1,6 +1,6 @@
 dist/*
 !dist/.npmignore
-
+*.env
 *.tgz
 
 node_modules/
