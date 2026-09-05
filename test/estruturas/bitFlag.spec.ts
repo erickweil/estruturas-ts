@@ -61,4 +61,22 @@ describe("Testes em BitFlag", () => {
             testBitFlag(new BitFlagArray(i));
         }
     });
+
+    test.each([32,64])("Utilização aleatória", (quantosBit) => {
+        const bit = createBitFlag(quantosBit);
+        let count = 0;
+        for(let i = 0; i < 100; i++) {
+            const indice = Math.floor(Math.random() * quantosBit);
+            const valor = bit.get(indice);
+            if(valor) {
+                bit.unset(indice);
+                count--;
+            } else {
+                bit.set(indice);
+                count++;
+            }
+            expect(bit.get(indice)).toBe(!valor);
+            expect(bit.count()).toBe(count);
+        }
+    });
 });
