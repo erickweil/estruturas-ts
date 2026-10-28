@@ -50,6 +50,17 @@ describe("Testes em Ordenação", () => {
         });
     }
 
+    function testarEstabilidade(algoritmo: <T>(lista: T[], compFn?: (a: T, b: T) => number) => T[]) {
+        const lista = gerarLista(500).map((k, i) => ({ k: k % 10, i }));
+        const ordenada = algoritmo(lista, (a, b) => a.k - b.k);
+        for(let i = 1; i < ordenada.length; i++) {
+            if(ordenada[i].k === ordenada[i-1].k) {
+                // Elementos iguais devem manter a ordem original
+                expect(ordenada[i].i).toBeGreaterThan(ordenada[i-1].i);
+            }
+        }
+    }
+
     test("BubbleSort", () => {
         testarAlgoritmoOrdenacao(bubbleSort);
     });
@@ -64,5 +75,13 @@ describe("Testes em Ordenação", () => {
 
     test("BinaryInsertionSort", () => {
         testarAlgoritmoOrdenacao(binaryInsertionSort);
+    });
+
+    test.each([
+        ["BubbleSort", bubbleSort],
+        ["InsertionSort", insertionSort],
+        ["BinaryInsertionSort", binaryInsertionSort],
+    ])("%s deve ser estável", (_nome, algoritmo) => {
+        testarEstabilidade(algoritmo);
     });
 });

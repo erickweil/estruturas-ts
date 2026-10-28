@@ -42,7 +42,7 @@ describe("Testes em BitFlag", () => {
     };
 
     test("BitFlag: testes para BitFlag32 com diferentes tamanhos", () => {
-        for(let i = 1; i <= 33; i++) {
+        for(let i = 0; i <= 33; i++) {
             testBitFlag(createBitFlag(i));
         }
 

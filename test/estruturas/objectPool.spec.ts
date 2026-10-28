@@ -109,4 +109,38 @@ describe('VecPool', () => {
 
         pool.clear();
     });
+
+    test("Struct aninhada no meio do schema não deve deixar espaço vazio", () => {
+        const pool = new BufferPool(2, {
+            a: StructType.int32(),
+            b: { c: StructType.int32() },
+            d: StructType.int32(),
+        });
+        expect(pool.stride).toBe(12);
+        expect(pool.schema.b.c.fieldOffset).toBe(4);
+        expect(pool.schema.d.fieldOffset).toBe(8);
+    });
+
+    test("Deve usar toda a capacidade antes de redimensionar", () => {
+        const pool = new BufferPool(4, { n: StructType.int32() });
+        for(let i = 0; i < 4; i++) {
+            pool.allocNode();
+        }
+        expect(pool.capacity()).toBe(4);
+        pool.allocNode();
+        expect(pool.capacity()).toBe(8);
+    });
+
+    test("Deve funcionar com capacidade inicial 0", () => {
+        const pool = new BufferPool(0, { n: StructType.int32() });
+        const nodes: number[] = [];
+        for(let i = 0; i < 10; i++) {
+            const n = pool.allocNode();
+            pool.schema.n.set(n, i);
+            nodes.push(n);
+        }
+        for(let i = 0; i < 10; i++) {
+            expect(pool.schema.n.get(nodes[i])).toBe(i);
+        }
+    });
 });

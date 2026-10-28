@@ -31,9 +31,6 @@
     "lint": "npx eslint ./ --ext .ts",
     "test": "vitest run"
   },
-  "jest": {
-    "rootDir": "./dist"
-  },
   "type": "module",
   "devDependencies": {
     "@types/asciichart": "^1.5.8",

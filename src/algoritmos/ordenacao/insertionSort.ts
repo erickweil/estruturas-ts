@@ -1,5 +1,5 @@
 import { lexicograficallyCompare } from "../../utils/lexicograficallyCompare.js";
-import { binarySearch, binarySearchLeftMost } from "../busca/binarySearch.js";
+import { binarySearchRightMost } from "../busca/binarySearch.js";
 
 export const insertionSort = <T>(arr: T[], compFn: (a: T,b: T) => number = lexicograficallyCompare): T[] => {
     // Para cada posição, começando no segundo:
@@ -38,7 +38,8 @@ export const binaryInsertionSort = <T>(arr: T[], compFn: (a: T,b: T) => number =
         const currentValue = arr[i];
 
         // Encontra a posição correta para inserção usando busca binária na parte ordenada (0 até i-1)
-        const insertionPoint = binarySearchLeftMost(arr, currentValue, 0, i, compFn);
+        // Insere após os elementos iguais para manter a ordenação estável
+        const insertionPoint = binarySearchRightMost(arr, currentValue, 0, i, compFn);
 
         // Desloca os elementos de 'insertionPoint' até 'i-1' uma posição para a direita
         for (let j = i; j > insertionPoint; j--) {

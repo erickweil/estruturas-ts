@@ -48,7 +48,7 @@ export class DualStackQueue<T> implements Queue<T> {
     /**
      * shift/dequeue - Remove e retorna o primeiro valor da fila
      * @returns {any} Retorna o primeiro valor da fila
-     * O(N)
+     * O(1) amortizado (O(N) quando precisa inverter a pilha de entrada)
      */
     removeFirst(): T | undefined {
         if(this.saida.length === 0) {

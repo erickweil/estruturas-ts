@@ -27,8 +27,8 @@ function _getStructSchema(schema: StructSchema, offset: number) {
             // Align 4-byte boundary?
             // offset = Math.ceil(offset / 4) * 4;
         } else {
-            // Se for um objeto, é uma struct aninhada
-            offset += _getStructSchema(type as StructSchema, offset);
+            // Se for um objeto, é uma struct aninhada (retorna o offset absoluto após ela)
+            offset = _getStructSchema(type as StructSchema, offset);
         }
     }
 

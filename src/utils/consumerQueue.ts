@@ -115,6 +115,11 @@ export class ConsumerQueue<T> {
     }
 
     close() {
+        // Fechar mais de uma vez não deve adicionar outro marcador de fim
+        if(this.isClosed) {
+            return;
+        }
+
         // Para indicar o fim da fila, adiciona um elemento nulo
         this.queue.addLast(null);
 

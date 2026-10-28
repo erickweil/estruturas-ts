@@ -73,3 +73,27 @@ export const binarySearchLeftMost = <T>(arr: T[], value: T, start?: number, end?
 
     return left;
 }
+
+/**
+ * Busca binária, retorna o índice do primeiro elemento que é estritamente maior que o valor buscado.
+ * @param start Índice inicial (inclusivo)
+ * @param end Índice final (exclusivo)
+ */
+export const binarySearchRightMost = <T>(arr: T[], value: T, start?: number, end?: number, compFn: (a: T,b: T) => number = lexicograficallyCompare): number => {
+    end = end === undefined ? arr.length : end;
+    let left = start === undefined ? 0 : start;
+    let right = end;
+
+    while(left < right) {
+        // Posição do meio
+        const mid = left + Math.floor((right - left) / 2);
+        const cmp = compFn(arr[mid], value);
+        if(cmp <= 0) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+
+    return left;
+}

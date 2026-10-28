@@ -43,6 +43,29 @@ describe("Testes em Fila", () => {
         expect(fila.capacity()).toBeGreaterThan(5);
     });
 
+    test("clear() deve manter a capacidade e limpar as referências", async () => {
+        let fila = new ArrayQueue<object>(5);
+        for(let i = 0; i < 20; i++) {
+            fila.addLast({ i });
+        }
+        // Deixa a fila "quebrada" (fim antes do início)
+        for(let i = 0; i < 15; i++) {
+            fila.removeFirst();
+            fila.addLast({ i });
+        }
+        const capacidade = fila.capacity();
+
+        fila.clear();
+
+        expect(fila.size()).toBe(0);
+        expect(fila.isEmpty()).toBe(true);
+        expect(fila.capacity()).toBe(capacidade);
+        expect((fila as any).arr.every((v: unknown) => v === undefined)).toBe(true);
+
+        fila.addLast({ i: 99 });
+        expect(fila.peekFirst()).toEqual({ i: 99 });
+    });
+
     test("Teste redimensionar fila cheia quebrada", async () => {
         let fila = new ArrayQueue<string>(5);
 

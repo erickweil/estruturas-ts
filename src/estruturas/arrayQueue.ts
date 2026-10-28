@@ -73,14 +73,14 @@ export class ArrayQueue<T> implements Queue<T> {
     }
 
     clear() {
-        /*while(this.inicio !== this.fim) {
+        // Reaproveita o array atual (mantendo a capacidade e o tipo criado por newFn),
+        // limpando apenas as posições ocupadas para não segurar referências
+        while(this.inicio !== this.fim) {
             this.arr[this.inicio] = undefined;
             this.inicio = this.incrementar(this.inicio);
-        }*/
+        }
         this.inicio = 0;
         this.fim = 0;
-
-        this.arr = new Array(DEFAULT_CAPACITY+1).fill(undefined);
     }
 
     isEmpty(): boolean {

@@ -65,7 +65,7 @@ export class BufferPool<T extends StructSchema> {
         }
 
         this.buffer = Buffer.alloc(capacity * this.stride);
-        this.view = new DataView(this.buffer.buffer);
+        this.view = new DataView(this.buffer.buffer, this.buffer.byteOffset, this.buffer.byteLength);
 
         this._bindStructSchema(schema);
 
@@ -89,7 +89,7 @@ export class BufferPool<T extends StructSchema> {
      * Aloca um novo objeto no pool, reutilizando um espaço vazio se disponível.
      */
     public allocNode(clear: boolean = true): number {
-        let isFull = (this.maxOffset + this.stride) >= this.buffer.byteLength;
+        let isFull = (this.maxOffset + this.stride) > this.buffer.byteLength;
         if (this.lastFree !== -1 && isFull) {
             // Reutiliza um espaço vazio (faz "pop" da pilha de vazios).
 
@@ -123,11 +123,11 @@ export class BufferPool<T extends StructSchema> {
     }
 
     private _resizeBuffer() {
-        const newCapacity = this.buffer.byteLength * 2; // Dobra a capacidade
+        const newCapacity = Math.max(this.buffer.byteLength * 2, this.stride); // Dobra a capacidade
         const newBuffer = Buffer.alloc(newCapacity);
         this.buffer.copy(newBuffer, 0, 0, this.buffer.byteLength);
         this.buffer = newBuffer;
-        this.view = new DataView(this.buffer.buffer);
+        this.view = new DataView(this.buffer.buffer, this.buffer.byteOffset, this.buffer.byteLength);
 
         // Atualiza o binding do schema
         this._bindStructSchema(this.schema);

@@ -57,7 +57,8 @@ export class BitFlag32 implements IBitFlag {
         //this.flags = valor ? (1 << this.nFlags) - 1 : 0;
         // Se nFlags for 32, (32 - 32) é 0. (-1 >>> 0) resulta em 0xFFFFFFFF (todos os 32 bits ligados)
         // Se nFlags for 3, (32 - 3) é 29. (-1 >>> 29) resulta em 7 (0b111)
-        this.flags = valor ? (-1 >>> (32 - this.nFlags)) : 0;
+        // Se nFlags for 0, precisa tratar separado pois (-1 >>> 32) é o mesmo que (-1 >>> 0)
+        this.flags = valor && this.nFlags > 0 ? (-1 >>> (32 - this.nFlags)) : 0;
     }
 
     set(n: number): void {

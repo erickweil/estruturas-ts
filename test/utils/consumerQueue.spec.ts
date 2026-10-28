@@ -113,6 +113,20 @@ describe("ConsumerQueue.size", () => {
         expect(fila.size()).toBe(0);
     });
 
+    test("close() deve ser idempotente", async () => {
+        fila.push(1);
+        fila.close();
+        fila.close();
+        expect(fila.isClosed).toBe(true);
+
+        const consumidos: number[] = [];
+        await fila.foreach((v) => { consumidos.push(v); });
+        expect(consumidos).toEqual([1]);
+
+        // Só existe um marcador de fim, então a fila fica vazia após consumi-lo
+        expect((fila as any).queue.isEmpty()).toBe(true);
+    });
+
     test("O marcador de fim de fila não conta como item pendente", async () => {
         fila.push(1);
         fila.close();

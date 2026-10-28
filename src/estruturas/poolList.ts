@@ -55,14 +55,16 @@ export class PoolList<T, SCHEMA extends (StructSchema | BinaryType<any>)> implem
     constructor(capacity: number | BufferPool<typeof this.schema>, schema: SCHEMA, 
         get: typeof this.getT,
         set: typeof this.setT) {
-        this.schema = {
-            value: schema,
-            next: StructType.int32(),
-            prev: StructType.int32(),
-        };
         if(typeof capacity === 'object') {
+            // O schema do pool já está vinculado ao buffer, então o parâmetro schema é ignorado
             this.pool = capacity;
+            this.schema = capacity.schema;
         } else {
+            this.schema = {
+                value: schema,
+                next: StructType.int32(),
+                prev: StructType.int32(),
+            };
             this.pool = new BufferPool(capacity, this.schema);
         }
         this.getT = get;

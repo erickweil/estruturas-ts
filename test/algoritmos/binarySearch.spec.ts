@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { binarySearch, binarySearchLeftMost } from "../../src/algoritmos/busca/binarySearch.js";
+import { binarySearch, binarySearchLeftMost, binarySearchRightMost } from "../../src/algoritmos/busca/binarySearch.js";
 
 describe("Testes em Busca Binária", () => {
     test("Busca binária", () => {
@@ -63,5 +63,19 @@ describe("Testes em Busca Binária", () => {
             expect(binarySearchLeftMost(arr, i, 0, arr.length, compFn)).toBe(i);
             expect(nComparacoes).toBeLessThanOrEqual(Math.ceil(Math.log2(arr.length)) + 1);
         }
+    });
+
+    test("Busca binária LeftMost e RightMost com elementos repetidos", () => {
+        const compFn = (a: number, b: number) => a - b;
+        const arr = [1,2,2,2,3,5,5,7];
+
+        expect(binarySearchLeftMost(arr, 2, 0, arr.length, compFn)).toBe(1);
+        expect(binarySearchRightMost(arr, 2, 0, arr.length, compFn)).toBe(4);
+        expect(binarySearchLeftMost(arr, 5, 0, arr.length, compFn)).toBe(5);
+        expect(binarySearchRightMost(arr, 5, 0, arr.length, compFn)).toBe(7);
+        expect(binarySearchRightMost(arr, 0, 0, arr.length, compFn)).toBe(0);
+        expect(binarySearchRightMost(arr, 7, 0, arr.length, compFn)).toBe(8);
+        expect(binarySearchRightMost(arr, 4, 0, arr.length, compFn)).toBe(5);
+        expect(binarySearchRightMost([], 4, 0, 0, compFn)).toBe(0);
     });
 });
