@@ -1,6 +1,6 @@
 export interface Tree<T> {
     add(value: T): void;
-    get(index: number): T | undefined;
+    get(value: T): T | undefined;
     traverseDFS(callback: (value: T) => void): void;
     traverseBFS(callback: (value: T) => void): void;
 

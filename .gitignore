@@ -2,7 +2,7 @@ dist/*
 !dist/.npmignore
 *.env
 *.tgz
-
+.npmrc
 node_modules/
 .node_modules/
 built/*
